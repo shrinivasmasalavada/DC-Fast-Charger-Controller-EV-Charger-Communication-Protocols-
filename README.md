@@ -1,0 +1,2 @@
+# DC-Fast-Charger-Controller-EV-Charger-Communication-Protocols-
+Charger-Side Hardware, and Buck / Boost Converters A Complete Technical Research &amp; Interview-Preparation Report Beginner → Intermediate Engineering Level Prepared for: Technical interview preparation — automotive / EV engineering startup Topics as advised by the engineering manager: DC fast charger controller · EV↔charger communication
