@@ -142,3 +142,45 @@ Cable temp sensed; lock solenoid driven
 Essential
 Figure 1 — Original overall architecture diagram. Power path (red), control path (green), communication path (blue). Topology names (Vienna, LLC, DAB) are typical examples, not universal — every such choice is architecture-dependent.
 Architecture-dependent notes (Fig. 1). Many designs place the PFC and DC/DC stages in a separate power cabinet with their own module controllers; the "Charger MCU" may then be a hierarchy (site controller + power-module controllers + dispenser controller) connected by CAN or Ethernet. Some 400 V-class chargers use non-isolated buck-derived output stages; most modern high-power units use isolated stages (LLC, DAB, or CLLC). Liquid cooling is standard above ~150 kW; air-cooled below. Do not present any single topology as "the" topology in the interview.
+3. Charger-Side Hardware and Components
+Fig. 2 — Charger-Side Hardware Block Diagram (one plausible architecture)
+AC Terminal + SPD
+distribution, surge clamp
+Breaker / Fuses
+short-circuit protection
+EMI / EMC Filter
+CM choke + X/Y caps
+PFC Rectifier
+Si/SiC switches + gate drv.
+current-loop + V-loop ctrl
+DC-Link Caps
++ bleed resistors
+DC/DC Modules
+isolated, N parallel,
+output relay + polarity
+Contactor + Pre-chg
++ shunt/Hall sensor
+→ CCS2 gun
+Sensor group
+V·I·T: output V/I, module T, coolant T, cable T, door/EM-stop
+Main MCU / Controller
+ADC · PWM · eCAP · CAN · Ethernet · state machine · logging
+Gate drivers (isolated)
++ desat/OCP protection, soft-off
+IMD + Ground check
+insulation resistance monitor
+Contactors / cooling
+coil drv., pump/fan PWM
+Aux PSU
+12/24V, standby rail
+CP/PP conditioning circuit
+levels A–F, PWM 5%, diode monitor, lock
+PLC modem (HomePlug Green PHY)
++ SECC stack (DIN 70121 / ISO 15118) — SLAC
+Energy meter
+class 0.5/1 billing-grade V·I·kWh
+HMI / RFID / NFC
+user interface, auth.
+4G / Ethernet
+OCPP to back-end
+Red = energy chain · Green = control & safety chain · Blue = user & data chain. Arrows into the MCU are ADC/digital inputs; arrows out are PWM/GPIO/drive signals.
