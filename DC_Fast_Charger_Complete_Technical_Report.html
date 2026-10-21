@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DC Fast Charger Controller, EV Communication Protocols, Charger Hardware and Buck/Boost Converters</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  body { font-family: Georgia, 'Times New Roman', serif; color: #1a1f2e; margin: 0; font-size: 10.5pt; line-height: 1.52; background: #fff; }
+  .page { width: 210mm; min-height: 297mm; padding: 20mm 17mm 18mm 17mm; position: relative; border-bottom: 2px dotted #ccc; }
+  h1, h2, h3, h4, h5 { font-family: 'Segoe UI', Arial, sans-serif; color: #0b3d6d; line-height: 1.25; }
+  h1 { font-size: 20pt; margin: 4mm 0 2mm; }
+  h2 { font-size: 15pt; border-bottom: 2.5px solid #0b3d6d; padding-bottom: 2px; margin: 8mm 0 3mm; }
+  h3 { font-size: 12pt; margin: 5mm 0 2mm; color: #11507f; }
+  h4 { font-size: 10.5pt; margin: 4mm 0 1.5mm; color: #1a5c8a; }
+  p { margin: 0 0 2.4mm; text-align: justify; }
+  ul, ol { margin: 1mm 0 3mm; padding-left: 6mm; }
+  li { margin-bottom: 1mm; }
+  table { border-collapse: collapse; width: 100%; font-family: 'Segoe UI', Arial, sans-serif; font-size: 8.3pt; margin: 2mm 0 4mm; }
+  th { background: #0b3d6d; color: #fff; padding: 4px 5px; text-align: left; font-weight: 600; }
+  td { border: 1px solid #b9c6d4; padding: 3.5px 5px; vertical-align: top; }
+  tr:nth-child(even) td { background: #eef3f9; }
+  code, pre { font-family: Consolas, 'Courier New', monospace; }
+  code { background: #eef2f7; padding: 0 3px; border-radius: 2px; font-size: 8.8pt; }
+  pre { background: #0f1e30; color: #d8e4f0; padding: 3.5mm; border-radius: 5px; font-size: 8.2pt; line-height: 1.45; overflow-x: hidden; white-space: pre-wrap; }
+  .eq { background: #eef3f9; border-left: 4px solid #0b3d6d; padding: 2.5mm 4mm; margin: 2.5mm 0; font-family: 'Cambria Math', Georgia, serif; }
+  .note { background: #fff7e6; border: 1px solid #e8c46a; border-left: 5px solid #d99a1b; padding: 2.5mm 3.5mm; margin: 3mm 0; font-size: 9.3pt; border-radius: 3px; }
+  .kannada { color: #6b4a00; font-style: normal; font-size: 9.6pt; }
+  .cite { color: #0b5c8a; font-size: 8.4pt; }
+  .figcap { font-family: 'Segoe UI', Arial, sans-serif; font-size: 8.6pt; color: #444; text-align: center; margin: 1mm 0 4mm; }
+  .tags { font-family: 'Segoe UI', Arial, sans-serif; font-size: 8pt; }
+  .tagE { background:#dff3e0; border:1px solid #58a05e; color:#1e5b23; border-radius:3px; padding:0.5px 5px; }
+  .tagA { background:#e6effc; border:1px solid #4d7fc4; color:#1c4a80; border-radius:3px; padding:0.5px 5px; }
+  .tagO { background:#f1e8f7; border:1px solid #9a6cc0; color:#5c3280; border-radius:3px; padding:0.5px 5px; }
+  .cover { display: flex; flex-direction: column; justify-content: center; height: 260mm; }
+  .cover .rule { height: 4px; background: linear-gradient(90deg, #0b3d6d, #2e86c1); margin: 6mm 0; }
+  .cover-sub { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11pt; color: #345; }
+  .toc td { border: none; border-bottom: 1px dotted #99a; font-size: 9.3pt; padding: 2.2px 2px; background: #fff !important; }
+  .toc a { color: #0b3d6d; text-decoration: none; }
+  .qa { margin-bottom: 3mm; }
+  .qa .q { font-family: 'Segoe UI', Arial, sans-serif; font-weight: 700; color: #0b3d6d; font-size: 9.8pt; }
+  .qa .lvl { font-family: 'Segoe UI', Arial, sans-serif; font-size: 7.6pt; color: #fff; background: #2e86c1; border-radius: 3px; padding: 1px 6px; vertical-align: 1.5px; }
+  .qa .a { margin: 1mm 0 0 4mm; }
+  .ref { font-size: 9.3pt; margin-bottom: 2.6mm; padding-left: 12mm; text-indent: -12mm; }
+  .pb { page-break-before: always; }
+  .svgwrap { margin: 2mm 0 0; }
+  svg text { font-family: 'Segoe UI', Arial, sans-serif; }
+  .small { font-size: 9pt; color: #444; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="page cover">
+  <div class="cover-sub" style="letter-spacing:2px;">TECHNICAL RESEARCH REPORT — INTERVIEW PREPARATION</div>
+  <div class="rule"></div>
+  <h1 style="font-size:26pt;">DC Fast Charger Controller, EV Communication Protocols, Charger-Side Hardware, and Buck/Boost Converters</h1>
+  <p class="cover-sub">A beginner-to-intermediate engineering guide covering: DC fast-charger architecture, charger-side and EV-side hardware, the complete EV↔charger communication flow (IEC 61851 control pilot, HomePlug Green PHY PLC, SLAC, DIN 70121, ISO 15118-2/-20), the charging sequence and state machine, buck and boost converter theory with worked examples, embedded control and firmware design, MATLAB/Simulink modelling, fault handling and troubleshooting, interview Q&amp;A, practical diagnostic scenarios, and a study roadmap.</p>
+  <div class="rule"></div>
+  <table style="font-size:10pt;">
+    <tr><td style="width:40%;border:none;"><b>Prepared for:</b> Technical interview preparation — automotive &amp; EV engineering startup (charger controller role)</td>
+        <td style="border:none;"><b>Date:</b> 9 October 2026</td></tr>
+    <tr><td style="border:none;"><b>Author:</b> Compiled with AI research assistance; all diagrams are original</td>
+        <td style="border:none;"><b>Version:</b> 1.0</td></tr>
+  </table>
+  <div class="note" style="margin-top:14mm;"><b>How to read this report.</b> Verified facts from public standards summaries and manufacturer documentation carry inline citations such as <span class="cite">[TI SLVA057]</span>. Statements that depend on a manufacturer, power rating, topology or protocol version are explicitly flagged <i>(architecture-dependent)</i>. Simplified illustrative examples are labelled as such and must not be treated as certified design data. The report is educational and is <b>not</b> a substitute for the actual standards (IEC 61851, ISO 15118, IEC 61851-23) or for your company's internal design documents. Selected difficult concepts include short Kannada explanations in parentheses: e.g., <span class="kannada">ಬಕ್ ಕನ್ವರ್ಟರ್ ವೋಲ್ಟೇಜನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ (ಇಳಿಸುವ ಪರಿವರ್ತಕ)</span>.</div>
+</div>
+
+<!-- ============ TOC ============ -->
+<div class="page">
+<h1>Table of Contents</h1>
+<table class="toc">
+<tr><td>1. Executive Summary</td><td style="text-align:right;">§1</td></tr>
+<tr><td>2. Complete DC Fast Charger Architecture (with block diagram)</td><td style="text-align:right;">§2</td></tr>
+<tr><td>3. Complete Charger-Side Hardware and Components</td><td style="text-align:right;">§3</td></tr>
+<tr><td>4. EV-Side Hardware</td><td style="text-align:right;">§4</td></tr>
+<tr><td>5. EV ↔ Charger Communication: Complete Protocol Explanation (sequence diagram)</td><td style="text-align:right;">§5</td></tr>
+<tr><td>6. Charging Sequence: Step-by-Step (sequence + state-machine diagrams)</td><td style="text-align:right;">§6</td></tr>
+<tr><td>7. Buck Converter: Full Technical Explanation</td><td style="text-align:right;">§7</td></tr>
+<tr><td>8. Boost Converter: Full Technical Explanation</td><td style="text-align:right;">§8</td></tr>
+<tr><td>9. Buck vs Boost vs Buck-Boost</td><td style="text-align:right;">§9</td></tr>
+<tr><td>10. Control System and Embedded Firmware</td><td style="text-align:right;">§10</td></tr>
+<tr><td>11. MATLAB/Simulink and Testing</td><td style="text-align:right;">§11</td></tr>
+<tr><td>12. Faults, Protection and Troubleshooting</td><td style="text-align:right;">§12</td></tr>
+<tr><td>13. Diagram Index</td><td style="text-align:right;">§13</td></tr>
+<tr><td>14. Interview Preparation (30 Q&amp;A)</td><td style="text-align:right;">§14</td></tr>
+<tr><td>15. Practical Scenarios (12 diagnostic walkthroughs)</td><td style="text-align:right;">§15</td></tr>
+<tr><td>16. Glossary, Standards Map and 3-Day Study Roadmap</td><td style="text-align:right;">§16</td></tr>
+<tr><td>17. References</td><td style="text-align:right;">§17</td></tr>
+</table>
+<h3>Diagram index</h3>
+<ul>
+  <li><b>Figure 1</b> — Overall DC fast charger architecture (power, control and communication paths) — §2</li>
+  <li><b>Figure 2</b> — CCS2 connector pin/function illustration — §5.1</li>
+  <li><b>Figure 3</b> — Control Pilot (CP) states and PWM duty-cycle concept — §5.3</li>
+  <li><b>Figure 4</b> — PLC/SLAC/protocol stack — §5.6</li>
+  <li><b>Figure 5</b> — EV↔charger communication sequence diagram — §5.8</li>
+  <li><b>Figure 6</b> — Charging session state machine — §6</li>
+  <li><b>Figure 7</b> — Buck converter circuit and ON/OFF current paths — §7</li>
+  <li><b>Figure 8</b> — Boost converter circuit and ON/OFF current paths — §8</li>
+  <li><b>Figure 9</b> — Buck vs boost inductor-current waveforms — §9.2</li>
+  <li><b>Figure 10</b> — MCU/ADC/PWM/sensor closed-loop feedback-control diagram — §10.1</li>
+  <li><b>Figure 11</b> — Charger fault-detection flowchart — §12.2</li>
+  <li><b>Figure 12</b> — EV-side hardware block diagram — §4</li>
+  <li><b>Figure 13</b> — Charger-side power/control hardware block diagram — §3</li>
+</ul>
+</div>
+
+<!-- ============ SECTION 1 ============ -->
+<div class="page pb">
+<h1>1. Executive Summary</h1>
+
+<h3>1.1 What is a DC fast charger?</h3>
+<p>A <b>DC fast charger (DCFC)</b>, also called a DC quick charger or — in standards language — an <i>EV Supply Equipment (EVSE)</i> providing DC charging, converts AC grid power into DC <b>outside</b> the vehicle and feeds that DC directly into the vehicle's high-voltage (HV) battery. This is the key contrast with ordinary AC charging: in AC charging the charger's onboard charger (OBC) inside the car performs the rectification, and its power rating (typically 3.7–22 kW <i>architecture-dependent</i>) limits the charging speed. In DC fast charging, the rectification and power conversion happen in the off-board cabinet, so power levels of 50 kW to 350 kW+ (and beyond, depending on the product) are possible, subject to what the vehicle's battery can accept <span class="cite">[Heliox, DC Charging Hardware Guide — R7]</span>.</p>
+<p><span class="kannada">ಸರಳವಾಗಿ: AC ಚಾರ್ಜಿಂಗ್‌ನಲ್ಲಿ ಕಾರಿ ಒಳಗಿನ ಚಾರ್ಜರ್ ಹೆಚ್ಚಳ (ನಿಧಾನ), DC ಫಾಸ್ಟ್ ಚಾರ್ಜರ್‌ನಲ್ಲಿ ಬಾಹ್ಯ ಕ್ಯಾಬಿನೆಟ್ DC ನೇರವಾಗಿ ಬ್ಯಾಟರಿಗೆ ನೀಡುತ್ತದೆ (ವೇಗವಾಗಿ).</span></p>
+
+<h3>1.2 Why is a charger controller required?</h3>
+<p>The power electronics (rectifiers, DC/DC modules, contactors) can only move energy; they cannot decide <i>how much</i>, <i>when</i>, or <i>whether it is safe</i>. The charger controller — a microcontroller (MCU) or a cluster of MCUs plus a main controller — is required to:</p>
+<ul>
+  <li><b>Protect people and hardware</b>: run insulation (cable) checks before energising, verify connector lock, monitor over-current/over-voltage/over-temperature, and open contactors within milliseconds when a fault appears <span class="cite">[Gongyuan IMD guide — R10]</span>.</li>
+  <li><b>Talk to the vehicle</b>: run the control-pilot signalling (IEC 61851-1) and the digital communication session (DIN 70121 / ISO 15118 over PLC) so that the charger delivers exactly the voltage/current the EV's battery management system (BMS) requests, and nothing more <span class="cite">[Typhoon HIL ISO 15118-2 reference — R5]</span>.</li>
+  <li><b>Regulate the power stage</b>: continuously adjust PWM switching of the power modules through gate drivers, using closed-loop feedback from voltage and current sensors.</li>
+  <li><b>Manage the session</b>: meter energy, authenticate the user (RFID/app/Plug &amp; Charge), talk to the charge-point operator's backend (OCPP), log events, and control cooling.</li>
+</ul>
+
+<h3>1.3 AC charging vs DC fast charging</h3>
+<table>
+<tr><th style="width:22%;">Aspect</th><th>AC charging (Mode 3, Type 2)</th><th>DC fast charging (Mode 4, CCS2)</th></tr>
+<tr><td><b>Where AC→DC conversion happens</b></td><td>Inside the vehicle (onboard charger, OBC)</td><td>In the off-board charger cabinet (rectifier + DC/DC stage)</td></tr>
+<tr><td><b>Typical power</b></td><td>≈3.7–22 kW (limited by OBC) <i>(architecture-dependent)</i></td><td>≈50–350 kW+ per dispenser <i>(product-dependent)</i></td></tr>
+<tr><td><b>What is on the "charging pins"</b></td><td>Live AC (L1/L2/L3), neutral</td><td>DC+ and DC− from the charger's power stage</td></tr>
+<tr><td><b>Communication</b></td><td>Control Pilot PWM (IEC 61851-1) is sufficient; ISO 15118 optional</td><td>Control Pilot PWM <b>plus</b> digital PLC session (DIN 70121/ISO 15118) is required to negotiate DC voltage/current</td></tr>
+<tr><td><b>Charger-side complexity</b></td><td>Low (relay, CP detection, metering)</td><td>High (PFC, DC/DC modules, liquid cooling, IMD, pre-charge, PLC modem)</td></tr>
+<tr><td><b>DC output voltage range</b></td><td>Not applicable (no DC output)</td><td>e.g. ≈150–1000 V programmable output range in modern units <i>(varies by product)</i></td></tr>
+</table>
+
+<h3>1.4 Power stage vs control/communication stage</h3>
+<p>A useful mental model for the interview: a DC fast charger is <b>two machines in one box</b>.</p>
+<ul>
+  <li><b>The power stage</b> — everything that carries the big energy: breaker, EMI filter, PFC rectifier, DC-link capacitors, isolated DC/DC converter modules, output contactors, connector pins, cooling. Rated in hundreds of kW.</li>
+  <li><b>The control/communication stage</b> — the MCUs, sensors, gate drivers, the CP circuit, the PLC modem (SECC), metering, HMI and backend connectivity. It senses, decides, commands, and reports. Rated in milliwatts, but it <i>governs</i> the power stage.</li>
+</ul>
+<p>They meet at two places: <b>gate drivers</b> (control → power) and <b>sensors</b> (power → control). If you can explain this split clearly, you can explain the whole system.</p>
+
+<h3>1.5 The complete system in simple language</h3>
+<p>You plug the CCS2 gun into the car. The charger detects the plug via the proximity pilot, hears the car "raise its hand" on the control pilot wire, and locks the connector. A small data modem then whispers over the same charging cable (power-line communication) to establish a digital session with the car's communication controller. The car says: "I am a 400 V battery, right now I want up to 250 A, and my maximum allowed voltage is 460 V." The charger checks the cable insulation with a test voltage, adjusts its output to match the battery voltage (pre-charge), closes the contactors, and starts delivering controlled DC power. Every second, the car keeps asking for the current it wants; the charger's feedback loops follow that request while watching voltage, current, temperature and insulation. When the battery is full or the car says stop, power ramps down, contactors open, the connector unlocks and the session ends. Everything else in this report is the engineering detail behind those two sentences.</p>
+</div>
+
+<!-- ============ SECTION 2 ============ -->
+<div class="page pb">
+<h1>2. Complete DC Fast Charger Architecture</h1>
+
+<h3>2.1 Overall block diagram</h3>
+<div class="svgwrap">
+<svg viewBox="0 0 760 620" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+<defs>
+<marker id="ar" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#0b3d6d"/></marker>
+<marker id="arR" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#a33"/></marker>
+<marker id="arG" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#2e7d32"/></marker>
+</defs>
+<text x="380" y="20" text-anchor="middle" font-size="15" font-weight="bold" fill="#0b3d6d">Figure 1 — DC Fast Charger: power path, control path, communication path</text>
+<!-- Power path -->
+<text x="60" y="48" font-size="11.5" font-weight="bold" fill="#7a2222">POWER PATH (thick energy flow)</text>
+<g stroke="#7a2222" stroke-width="1.4">
+<rect x="30" y="60" width="92" height="46" rx="4" fill="#fdecea" stroke="#a33"/>
+<rect x="140" y="60" width="92" height="46" rx="4" fill="#fdecea" stroke="#a33"/>
+<rect x="250" y="60" width="92" height="46" rx="4" fill="#fdecea" stroke="#a33"/>
+<rect x="360" y="60" width="92" height="46" rx="4" fill="#fdecea" stroke="#a33"/>
+<rect x="470" y="60" width="92" height="46" rx="4" fill="#fdecea" stroke="#a33"/>
+<rect x="580" y="60" width="88" height="46" rx="4" fill="#fdecea" stroke="#a33"/>
+<rect x="686" y="52" width="66" height="62" rx="8" fill="#fdecea" stroke="#a33"/>
+</g>
+<g font-size="9.2" fill="#3a0d0d" text-anchor="middle">
+<text x="76" y="79">AC Grid</text><text x="76" y="92" font-size="8">(3φ 415 V /</text><text x="76" y="101" font-size="8">variable)</text>
+<text x="186" y="79">Breaker + Fuses</text><text x="186" y="92" font-size="8">+ SPD</text><text x="186" y="101" font-size="8">(protection)</text>
+<text x="296" y="79">EMI Filter</text><text x="296" y="92" font-size="8">(common/diff.</text><text x="296" y="101" font-size="8">mode chokes)</text>
+<text x="406" y="79">AC/DC Rectifier</text><text x="406" y="92" font-size="8">with PFC</text><text x="406" y="101" font-size="8">(often Viennna/boost)</text>
+<text x="516" y="79">DC-Link Caps</text><text x="516" y="92" font-size="8">(~800 V typical,</text><text x="516" y="101" font-size="8">arch.-dep.)</text>
+<text x="624" y="79">DC/DC Stage</text><text x="624" y="92" font-size="8">isolated modules</text><text x="624" y="101" font-size="8">(e.g. LLC / DAB)</text>
+<text x="719" y="72">EV</text><text x="719" y="84">Battery</text><text x="719" y="96">pack</text><text x="719" y="108" font-size="7.5">(BMS)</text>
+</g>
+<g stroke="#a33" stroke-width="3">
+<line x1="122" y1="83" x2="138" y2="83"/><line x1="232" y1="83" x2="248" y2="83"/><line x1="342" y1="83" x2="358" y2="83"/>
+<line x1="452" y1="83" x2="468" y2="83"/><line x1="562" y1="83" x2="578" y2="83"/><line x1="668" y1="83" x2="684" y2="83"/>
+</g>
+<!-- Contactor + connector box -->
+<g stroke="#7a2222">
+<rect x="580" y="130" width="92" height="42" rx="4" fill="#fff" stroke="#a33"/>
+<rect x="686" y="126" width="66" height="50" rx="8" fill="#eef3f9" stroke="#0b3d6d"/>
+</g>
+<text x="626" y="147" font-size="9.2" text-anchor="middle" fill="#3a0d0d">Output</text><text x="626" y="158" font-size="9.2" text-anchor="middle" fill="#3a0d0d">Contactor +</text><text x="626" y="169" font-size="9.2" text-anchor="middle" fill="#3a0d0d">Pre-charge</text>
+<text x="719" y="148" font-size="9.2" text-anchor="middle" fill="#0b3d6d">CCS2</text><text x="719" y="160" font-size="9.2" text-anchor="middle" fill="#0b3d6d">Connector</text><text x="719" y="172" font-size="8" text-anchor="middle" fill="#0b3d6d">DC+/DC−/CP/PP/PE</text>
+<line x1="624" y1="106" x2="624" y2="128" stroke="#a33" stroke-width="3"/>
+<line x1="672" y1="151" x2="684" y2="151" stroke="#a33" stroke-width="3"/>
+<line x1="719" y1="114" x2="719" y2="124" stroke="#a33" stroke-width="3"/>
+<!-- Control path -->
+<text x="60" y="215" font-size="11.5" font-weight="bold" fill="#7a4a00">CONTROL PATH (sensing + command)</text>
+<g stroke="#b26a00">
+<rect x="30" y="228" width="140" height="58" rx="4" fill="#fff8e8" stroke="#b26a00"/>
+<rect x="290" y="228" width="180" height="58" rx="6" fill="#fff8e8" stroke="#b26a00" stroke-width="2"/>
+<rect x="560" y="228" width="192" height="58" rx="4" fill="#fff8e8" stroke="#b26a00"/>
+</g>
+<g font-size="9.2" fill="#4a3000" text-anchor="middle">
+<text x="100" y="248">Sensors: V, I, temp</text><text x="100" y="261" font-size="8">output V/I · DC-link V ·</text><text x="100" y="271" font-size="8">module temps · coolant temp</text>
+<text x="380" y="248" font-size="10.5" font-weight="bold">Charger MCU / Controller</text>
+<text x="380" y="262" font-size="8">ADC sampling · control loops · state machine ·</text><text x="380" y="272" font-size="8">protection · logging · HMI/metering/OCPP</text>
+<text x="656" y="248">Power-module controller</text><text x="656" y="261">+ Gate Drivers</text><text x="656" y="273" font-size="8">(isolated, drives PFC + DC/DC switches)</text>
+</g>
+<g stroke="#b26a00" stroke-width="2">
+<line x1="170" y1="250" x2="288" y2="250" marker-end="url(#arG)"/>
+<line x1="470" y1="250" x2="558" y2="250" marker-end="url(#arG)"/>
+</g>
+<text x="229" y="243" font-size="8" text-anchor="middle" fill="#7a4a00">ADC in</text><text x="514" y="243" font-size="8" text-anchor="middle" fill="#7a4a00">PWM out</text>
+<line x1="470" y1="275" x2="558" y2="275" stroke="#b26a00" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arG)"/>
+<text x="514" y="288" font-size="8" text-anchor="middle" fill="#7a4a00">fault trip / PWM enable</text>
+<line x1="380" y1="286" x2="380" y2="330" stroke="#b26a00" stroke-width="2" stroke-dasharray="4 3"/>
+<line x1="100" y1="286" x2="100" y2="196" stroke="#b26a00" stroke-width="1.4" stroke-dasharray="2 2"/>
+<line x1="100" y1="196" x2="410" y2="110" stroke="#b26a00" stroke-width="1.4" stroke-dasharray="2 2"/>
+<text x="120" y="205" font-size="8" fill="#7a4a00">senses power path</text>
+<!-- Communication path -->
+<text x="60" y="360" font-size="11.5" font-weight="bold" fill="#0b3d6d">COMMUNICATION PATH (vehicle session)</text>
+<g stroke="#0b3d6d">
+<rect x="30" y="372" width="150" height="66" rx="8" fill="#eef3f9" stroke="#0b3d6d" stroke-width="2"/>
+<rect x="220" y="372" width="160" height="66" rx="4" fill="#eef3f9" stroke="#0b3d6d"/>
+<rect x="420" y="372" width="160" height="66" rx="4" fill="#eef3f9" stroke="#0b3d6d"/>
+<rect x="620" y="372" width="132" height="66" rx="4" fill="#eef3f9" stroke="#0b3d6d"/>
+</g>
+<g font-size="9.2" fill="#082c4f" text-anchor="middle">
+<text x="105" y="393" font-weight="bold">EV side (in car)</text>
+<text x="105" y="406" font-size="8">BMS · VCU</text><text x="105" y="417" font-size="8">EVCC (EV Communication</text><text x="105" y="427" font-size="8">Controller) + PLC modem</text>
+<text x="300" y="393" font-weight="bold">CCS2 connector / CP pin</text>
+<text x="300" y="406" font-size="8">CP: PWM + PLC carrier</text><text x="300" y="417" font-size="8">PP: plug presence</text><text x="300" y="427" font-size="8">PE: PLC return path</text>
+<text x="500" y="393" font-weight="bold">SECC / PLC modem</text>
+<text x="500" y="406" font-size="8">SLAC matching ·</text><text x="500" y="417" font-size="8">DIN 70121 / ISO 15118</text><text x="500" y="427" font-size="8">session handling</text>
+<text x="686" y="393" font-weight="bold">Charger Controller</text>
+<text x="686" y="406" font-size="8">applies limits to power</text><text x="686" y="417" font-size="8">stage · safety interlocks</text><text x="686" y="427" font-size="8">· IMD · metering</text>
+</g>
+<g stroke="#0b3d6d" stroke-width="2">
+<line x1="180" y1="400" x2="218" y2="400" marker-end="url(#ar)" marker-start="url(#ar)"/>
+<line x1="380" y1="400" x2="418" y2="400" marker-end="url(#ar)" marker-start="url(#ar)"/>
+<line x1="580" y1="400" x2="618" y2="400" marker-end="url(#ar)" marker-start="url(#ar)"/>
+</g>
+<line x1="380" y1="330" x2="380" y2="372" stroke="#b26a00" stroke-width="2"/>
+<text x="390" y="352" font-size="8" fill="#7a4a00">limits from session → power-stage setpoints</text>
+<!-- Note strip -->
+<rect x="30" y="462" width="722" height="128" rx="5" fill="#f6f9fc" stroke="#8aa"/>
+<text x="44" y="482" font-size="10.5" font-weight="bold" fill="#0b3d6d">How the three paths interact (read this with the diagram):</text>
+<text x="44" y="500" font-size="9.4" fill="#223">1. Communication path negotiates EV battery limits and requests (SessionSetup → CableCheck → PreCharge → CurrentDemand loop).</text>
+<text x="44" y="517" font-size="9.4" fill="#223">2. Charger controller converts those requests into voltage/current setpoints for the control loops.</text>
+<text x="44" y="534" font-size="9.4" fill="#223">3. Control path closes the loop: sensors → ADC → MCU → PWM → gate drivers → power path → sensors (repeat every switching / control cycle).</text>
+<text x="44" y="551" font-size="9.4" fill="#223">4. Power path moves the energy: grid AC → DC link → isolated DC/DC → contactor → CCS2 pins → EV battery.</text>
+<text x="44" y="575" font-size="9" fill="#666" font-style="italic">Architecture-dependent: single integrated controller vs separate power-module MCUs; 500 V vs 800/1000 V DC link; liquid vs forced-air cooling;</text>
+<text x="44" y="587" font-size="9" fill="#666" font-style="italic">one-way vs bidirectional (V2G) power stage. The blocks shown are the common core; individual products merge or duplicate blocks.</text>
+</svg>
+</div>
+<div class="figcap">Figure 1. Overall DC fast charger architecture. Red = power path, amber = control path, blue = communication path. All diagrams in this report are original.</div>
+
+<h3>2.2 Explanation of every block (power path)</h3>
+<table>
+<tr><th style="width:17%;">Block</th><th style="width:27%;">Purpose</th><th style="width:20%;">Inputs</th><th style="width:18%;">Outputs</th><th>Interaction with neighbours</th></tr>
+<tr><td><b>AC input &amp; distribution</b></td><td>Take 3-phase grid power, distribute to rectifier, auxiliary supplies and cooling</td><td>Grid (e.g. 400 V AC 3φ; India commonly 415 V; rating varies)</td><td>Protected AC feed</td><td>Feeds EMI filter; monitored by controller via input voltage sensing</td></tr>
+<tr><td><b>Circuit breaker / fuses</b></td><td>Over-current and short-circuit protection, service disconnection</td><td>AC from grid</td><td>AC to charger (or nothing, if tripped)</td><td>Upstream of everything; controller can trip shunt-trip breaker on severe faults</td></tr>
+<tr><td><b>Surge Protection Device (SPD)</b></td><td>Clamp lightning/grid surges</td><td>AC lines + PE</td><td>Clamped AC</td><td>Parallel device; its status flag can be read by the controller</td></tr>
+<tr><td><b>EMI/EMC filter</b></td><td>Stop switching noise going to/from grid; also shapes the CP/PLC signal environment</td><td>Noisy AC</td><td>Cleaner AC</td><td>Between input and PFC; design must not attenuate the PLC band (≈2–30 MHz) <span class="cite">[ISO 15118-3 summary — R4]</span></td></tr>
+<tr><td><b>AC/DC rectifier with PFC</b></td><td>Convert AC to DC with sinusoidal grid current (power factor ≈1); boost the bus to a regulated DC-link voltage</td><td>AC mains</td><td>DC-link voltage (e.g. ≈800 V, <i>varies</i>)</td><td>Switches driven by gate drivers; PFC control loop in module controller</td></tr>
+<tr><td><b>DC-link capacitors</b></td><td>Energy buffer; absorb switching ripple; hold voltage stiff between PFC and DC/DC</td><td>Rectifier DC</td><td>Smooth DC bus</td><td>Must be pre-charged at start-up and discharged at shutdown; monitored for over-voltage</td></tr>
+<tr><td><b>DC/DC power conversion stage</b></td><td>Isolate and regulate the EV battery voltage/current from the fixed DC link (galvanic isolation required in DC charging per IEC 61851-23 practice)</td><td>DC link</td><td>Programmable DC output (V set by EV request)</td><td>The heart of the charger; often multiple parallel/interleaved modules; controlled by MCU PWM via gate drivers</td></tr>
+<tr><td><b>Output contactor + pre-charge/discharge</b></td><td>Connect/disconnect output safely; pre-charge matches output voltage to battery before closure; discharge bleeds output after session</td><td>DC/DC output</td><td>DC to connector</td><td>Commanded by controller; contactor feedback (aux contacts) monitored</td></tr>
+<tr><td><b>CCS2 connector + cable</b></td><td>Physical interface: DC+, DC−, CP, PP, PE</td><td>Contactor output</td><td>Energy + signalling to EV inlet</td><td>CP line carries both PWM and PLC; PP used for plug detection and (in AC) cable current rating</td></tr>
+</table>
+
+<h3>2.3 Control and communication blocks</h3>
+<table>
+<tr><th style="width:20%;">Block</th><th style="width:40%;">Purpose</th><th style="width:20%;">Inputs</th><th>Outputs / interactions</th></tr>
+<tr><td><b>Sensors (V/I/T)</b></td><td>Measure output voltage, output current, module/component temperatures, DC-link voltage; provide the raw feedback for all control and protection</td><td>Power-stage nodes</td><td>Analog (or digital) signals to MCU ADCs / isolated digital interfaces</td></tr>
+<tr><td><b>Charger MCU / controller</b></td><td>Runs state machine, control loops, protection, communication stack handling, logging, HMI/metering/backend tasks (often split across several processors)</td><td>Sensor data, CP state, PLC session data, user input</td><td>PWM to gate drivers, contactor commands, cooling commands, displays, OCPP messages</td></tr>
+<tr><td><b>Gate drivers / module controller</b></td><td>Translate MCU PWM into isolated, high-current gate pulses for power switches; provide dead-time, desaturation/over-current protection per switch</td><td>PWM + enable from MCU, DC-link supplies</td><td>Gate pulses to PFC and DC/DC switches; fault flags back to MCU</td></tr>
+<tr><td><b>IMD</b></td><td>Insulation Monitoring Device: measures insulation resistance between DC output and PE; mandatory for the cable check and continuous monitoring in DC charging</td><td>DC output nodes, PE</td><td>Insulation status to controller and (via protocol) to the EV</td></tr>
+<tr><td><b>CP / PP interface</b></td><td>Generate and sense the control-pilot voltage/PWM; sense proximity/presence</td><td>CP line, PP line</td><td>Vehicle state (A/B/C/D/E/F) to MCU</td></tr>
+<tr><td><b>SECC (PLC modem)</b></td><td>Supply-Equipment Communication Controller: SLAC pairing and the DIN 70121 / ISO 15118 session over HomePlug Green PHY PLC</td><td>PLC carrier on CP+PE</td><td>Session messages to controller; requested limits to control loops</td></tr>
+<tr><td><b>Auxiliary power supply</b></td><td>Generates low-voltage rails (e.g. 24 V, 12 V, 5 V, 3.3 V) for MCUs, drivers, relays, cooling</td><td>AC input or DC link</td><td>Standby power — present even before a session starts</td></tr>
+</table>
+
+<h3>2.4 Architecture-dependent variations (say this in the interview)</h3>
+<ul>
+  <li><b>Topology of the power stage</b>: many commercial chargers use a two-stage design (PFC rectifier → isolated DC/DC such as LLC or dual-active-bridge). Some modular designs stack or parallel modules; some use interleaved phases to reduce ripple. Not every charger is "a buck or a boost" — see §9.4.</li>
+  <li><b>Control partitioning</b>: a single main controller may run everything, or the power modules may have their own controllers that only accept setpoints from the main controller. Both exist.</li>
+  <li><b>Voltage class</b>: 150–500 V, 150–850 V, 150–1000 V output windows are common product classes; newer products extend to 1000 V+ for 800 V-class vehicles <i>(product-dependent)</i>.</li>
+  <li><b>Cooling</b>: forced-air below ≈60 kW class, liquid cooling for high power modules and cables <i>(typical practice, varies)</i>.</li>
+</ul>
+</div>
+
+<!-- ============ SECTION 3 ============ -->
+<div class="page pb">
+<h1>3. Complete Charger-Side Hardware and Components</h1>
+<p>Key for the table below: <span class="tags"><span class="tagE">Essential</span></span> = present in essentially every DC fast charger; <span class="tags"><span class="tagA">Arch-dep.</span></span> = depends on design/power class/region; <span class="tags"><span class="tagO">Optional</span></span> = market or feature dependent. Ratings shown are <i>typical illustrative ranges</i> — always verify against the specific product datasheet; do not quote them as standard values in an interview without saying "typical".</p>
+<table style="font-size:7.8pt;">
+<tr><th style="width:12%;">Component</th><th style="width:17%;">Main function</th><th style="width:12%;">Input → Output</th><th style="width:13%;">Typical signals / ratings <span class="small">(illustrative)</span></th><th style="width:13%;">Connection to MCU</th><th style="width:12%;">Common failure modes</th><th style="width:13%;">Test / debug method</th><th style="width:8%;">Class</th></tr>
+<tr><td>AC input terminal &amp; distribution</td><td>Terminate grid feed; distribute to power stage, aux PSU, cooling</td><td>Grid 3φ → internal busbars</td><td>e.g. 400/415 V 3φ, 50/60 Hz; up to hundreds of A per phase</td><td>Input V/phase presence sensing; breaker status aux contact</td><td>Loose termination → arcing/heating; phase loss</td><td>Thermal camera on terminations; phase-presence indicators; torque checks</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>Circuit breaker(s) &amp; fuses</td><td>Overload/short-circuit protection; isolation for service</td><td>Grid AC → protected AC</td><td>MCCB sized to feed; semiconductor fuses inside power modules</td><td>Aux contacts → digital inputs</td><td>Nuisance trips; welded/fatigued contacts; wrong sizing after retrofits</td><td> Trip counters in logs; contact-resistance test; verify coordination with fuse curves</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>SPD (surge protector)</td><td>Clamp lightning/switching surges</td><td>AC+PE → clamped</td><td>Type per region (e.g. T1/T2); MOV-based</td><td>Digital status (healthy/end-of-life flag)</td><td>MOV degradation after surges; silent end-of-life</td><td>Read status flag; visual window check during service</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>EMI/EMC filter</td><td>Suppress conducted EMI both directions; must pass PLC band on CP/PE</td><td>Noisy AC/DC lines → filtered</td><td>CM/DM chokes, X/Y caps</td><td>None (passive)</td><td>Capacitor failure; over-temperature; PLC signal attenuation if mistuned</td><td>Conducted-emission pre-compliance scan; PLC attenuation test (SLAC margin)</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>AC/DC rectifier (front end)</td><td>AC→DC conversion</td><td>AC → DC link</td><td>Diode-bridge (small) or active 3φ PWM rectifier (most DCFCs)</td><td>Module controller / gate drivers</td><td>Device failure (short), driver failure, DC-link cap failure</td><td>Oscilloscope on DC link; device curve-tracing in service; logs of PFC errors</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>PFC stage</td><td>Force grid current sinusoidal (PF≈1); regulate DC-link voltage</td><td>AC → regulated DC link</td><td>Boost/Vienna-type; PF&gt;0.98 typical target; THDi limits per grid codes</td><td>PFC controller (often inside module controller); PWM from MCU-level logic</td><td>Loss of PF correction → grid-code failures; unstable DC link</td><td>Power analyzer (PF, THD); DC-link ripple measurement</td><td><span class="tagE">Essential</span> for DCFC</td></tr>
+<tr><td>DC-link capacitors</td><td>Buffer energy, stiffen bus</td><td>Rectifier → smooth DC</td><td>Electrolytic or film caps; e.g. bus ~800 V class <i>(varies)</i></td><td>Voltage sense; temp sense (arch-dep.)</td><td>Drying out (electrolytic); swelling; venting; capacity fade → higher ripple</td><td>Capacitance/ESR measurement at service; ripple spectrum on scope</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>DC/DC converter / power modules</td><td>Isolated conversion DC link → battery</td><td>DC link → controlled DC out</td><td>Full/half-bridge LLC, DAB, phase-shift full bridge; modular stacks</td><td>Module controller accepting V/I setpoints; status CAN/UART to main MCU</td><td>Switch short-circuit, transformer insulation, control drift</td><td>Setpoint step-response tests; module error registers; thermal scan</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>MOSFET / IGBT / SiC MOSFET switches</td><td>High-speed switching of power stage</td><td>—</td><td>IGBT 1200 V class (older), SiC MOSFET 1200 V class (modern, higher efficiency &amp; frequency) <span class="cite">[Infineon CoolSiC EV charging portfolio — R13]</span></td><td>Driven via gate drivers</td><td>Overcurrent/avalanche failure, gate-oxide damage, solder fatigue</td><td>Desat trip tests; V<sub>CE</sub>/R<sub>DS(on)</sub> trending; IR thermography</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>Gate drivers</td><td>Isolate &amp; amplify PWM; protect switches</td><td>Logic PWM → isolated gate pulses</td><td>Isolated drivers; ±V gate rails; desat/OC detection</td><td>PWM in, fault line out</td><td>Bootstrap cap failure, opto/isolation degradation, false turn-on</td><td>Scope on gate waveform (V<sub>GE</sub>/V<sub>GS</sub>, timing, ringing); fault-flag injection</td><td><span class="tagE">Essential</span> <span class="cite">[TI SLUA618 — R12]</span></td></tr>
+<tr><td>Voltage sensors</td><td>Measure DC-link &amp; output voltage</td><td>HV node → scaled signal</td><td>Isolated (Hall/AMR) or resistive dividers with isolation amps</td><td>ADC input (isolated)</td><td>Gain/drift error; damaged isolation</td><td>Calibration against reference meter; plausibility checks in firmware</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>Current sensors</td><td>Measure output current(s) &amp; per-phase currents</td><td>Conductor → signal</td><td>Shunt (+isolated amp), Hall-effect (closed/open loop), fluxgate for precision</td><td>ADC input</td><td>Offset drift, saturation (Hall), thermal shift</td><td>Clamp-meter cross-check; offset calibration at zero current</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>Temperature sensors</td><td>Module/inductor/coolant/connector temperatures</td><td>—</td><td>NTC thermistors, PT100/RTD, on-die sensors in smart modules</td><td>ADC / digital (I2C/SPI)</td><td>Open/short reading as extreme values; detachment → wrong temp</td><td>Readback plausibility; compare channels; IR camera spot check</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>MCU / embedded controller</td><td>Brain: state machine, loops, comms, protection</td><td>Sensors, comms → commands</td><td>32-bit MCUs (ARM Cortex-M/R class); sometimes multiple MCUs + a main CPU</td><td>— (is the hub)</td><td>Watchdog resets, flash corruption, brown-out</td><td>Debug logs, watchdog-reset counters, JTAG/SWD traces in development</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>ADC &amp; PWM peripherals</td><td>Digitize sensors; generate switching/control PWM</td><td>Analog in → digital values; timer → PWM</td><td>12–16-bit ADCs; PWM ~kHz (low-voltage rails) to tens of kHz–100 kHz+ per module <i>(varies)</i></td><td>On-chip</td><td>Timing jitter, sampling mis-synchronization</td><td>PWM scope checks; ADC self-test routines</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>Auxiliary power supply</td><td>Low-voltage rails for everything electronic</td><td>AC/DC link → 24/12/5/3.3 V</td><td>Standby operation always on</td><td>Powers MCU, drivers, relays, comms</td><td>Caps aging, brown-out during grid dips</td><td>Rail voltage checks under load; brown-out ride-through tests</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>Contactors &amp; drivers</td><td>Connect/disconnect DC output</td><td>DC output path</td><td>DC-rated contactors (magnetic blowout / COSEN type); coil 24 V typical</td><td>Digital output + aux-contact feedback input</td><td>Contact welding, coil burnout, slow operation</td><td>Aux-contact timing measurement; welding detection routine at session end <span class="cite">[Typhoon HIL — R5]</span></td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>Pre-charge circuit</td><td>Limit inrush: raise output to battery voltage before main contactor closes</td><td>DC out via resistor/DC/DC ramp</td><td>Pre-charge resistor + relay, or controlled voltage ramp of the DC/DC stage <i>(arch-dep.)</i></td><td>State-machine controlled</td><td>Resistor burnout; timeout (battery not matching)</td><td>Pre-charge duration logging vs battery V; resistor thermal check</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>Discharge (bleed) circuit</td><td>De-energize output after stop; support welding detection</td><td>Output caps → discharge</td><td>Active dump or resistors</td><td>State-machine controlled</td><td>Bleeder open → output stays live</td><td>Measure output decay time after stop</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>IMD</td><td>Insulation resistance monitoring DC→PE; cable check &amp; continuous monitoring</td><td>DC out + PE → status</td><td>Thresholds commonly expressed in Ω/V of operating voltage; e.g. &lt;100 Ω/V → fault, &gt;500 Ω/V → OK band <i>(per IEC 61851-23 design practice; verify edition)</i> <span class="cite">[Gongyuan — R10]</span></td><td>Digital/analog status to MCU; result reported in CableCheck</td><td>Self-test failures; nuisance trips in humid conditions</td><td>Simulated insulation resistance calibrator; self-test button</td><td><span class="tagE">Essential</span> for DC</td></tr>
+<tr><td>Ground/earth monitoring</td><td>Verify PE integrity before/during operation</td><td>PE circuit</td><td>PE continuity/presence check</td><td>Digital input</td><td>Corroded earth stake in fixed installs</td><td>Loop resistance tests at commissioning</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>PLC modem / SECC</td><td>Vehicle digital link (SLAC + V2G protocol)</td><td>CP+PE carrier → Ethernet/IP inside charger</td><td>HomePlug Green PHY, QPSK/BPSK/256-QAM roaming per profile</td><td>Messages over internal bus to main controller</td><td>No SLAC match; noisy CP injection circuit; firmware mismatch to EV</td><td>PLC sniffer/log, SLAC logs (attenuation dB values), protocol traces</td><td><span class="tagE">Essential</span> for CCS</td></tr>
+<tr><td>Control Pilot (CP) interface</td><td>PWM generation &amp; CP voltage state detection; connector lock control</td><td>CP pin</td><td>±12 V levels; 1 kHz PWM; duty cycle signals available current in AC/basic signalling</td><td>ADC + GPIO + PWM periph</td><td>Diode fault detection (EV side), dirty pins → wrong state</td><td>Pilot-state oscilloscope capture; state-transition tests</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>Proximity Pilot (PP)</td><td>Plug presence (and AC cable rating via resistor)</td><td>PP pin</td><td>Resistor-coded</td><td>ADC input</td><td>Broken resistor coding, dirty pins</td><td>State check on insertion</td><td><span class="tagA">Arch-dep.</span></td></tr>
+<tr><td>CCS2 connector &amp; cable</td><td>Physical + signalling interface</td><td>—</td><td>DC pins plus CP/PP/PE; liquid-cooled cables for high current <i>(varies)</i></td><td>—</td><td>Pin wear/arcing, cable damage, latch failure</td><td>Visual + contact-resistance measurement; lock actuator test</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>Cooling system (fans/pumps/coolant)</td><td>Remove losses from modules &amp; cable</td><td>—</td><td>Fan/air for lower power; water-glycol loops for high power</td><td>Pump/fan control + flow/leak/temp sensors</td><td>Pump wear, coolant leaks, fan bearing failure, clogged filters</td><td>Flow switches, ΔT monitoring, leak detection loops</td><td><span class="tagA">Arch-dep.</span></td></tr>
+<tr><td>Energy meter</td><td>Billable kWh measurement</td><td>Output (or grid side) → kWh</td><td>Class-indexed meters per local metrology rules <i>(region-dep.)</i></td><td>Modbus/UART/internal</td><td>Calibration drift; tampering</td><td>Sealed calibration; meter self-diagnostics</td><td><span class="tagE">Essential</span> (billing)</td></tr>
+<tr><td>HMI / display</td><td>User interface &amp; status</td><td>User touch → controller</td><td>Touchscreen, LEDs</td><td>UART/CAN/USB/internal</td><td>Screen failure; sunlight washout</td><td>Frame-buffer tests; touch calibration</td><td><span class="tagA">Arch-dep.</span></td></tr>
+<tr><td>RFID / NFC reader</td><td>User authentication</td><td>Card → ID</td><td>MIFARE/ISO 14443/15693 class</td><td>UART/SPI/USB</td><td>Antenna damage; reader lockups</td><td>Test card set; read-range test</td><td><span class="tagO">Optional</span></td></tr>
+<tr><td>Ethernet / CAN / RS485 / cellular</td><td>Internal &amp; external connectivity</td><td>—</td><td>Internal buses: CAN between boards; external: Ethernet, 4G/LTE</td><td>Various</td><td>Signal integrity, modem drops</td><td>Bus error counters (CAN), ping/throughput tests</td><td><span class="tagA">Arch-dep.</span></td></tr>
+<tr><td>Emergency stop &amp; interlocks</td><td>Immediate safe shutdown; door/access interlocks</td><td>Button → safety chain</td><td>Hard-wired safety circuit (independent of software best-practice)</td><td>Hardwired + logged</td><td>Contact corrosion; cable damage</td><td>Periodic E-stop function tests</td><td><span class="tagE">Essential</span></td></tr>
+<tr><td>Backend / OCPP link</td><td>Operator cloud: auth, pricing, telemetry, remote control</td><td>Charger → CSMS</td><td>OCPP 1.6/2.0.1 over Ethernet/cellular <i>(feature-dep.)</i></td><td>Main controller</td><td>Network outages; message queue overflow</td><td>OCPP message logs; offline-auth fallback testing</td><td><span class="tagA">Arch-dep.</span></td></tr>
+</table>
+<div class="figcap">Table 3.1 — Charger-side component map. Ratings marked "illustrative" vary by product; verify with the specific datasheet before quoting.</div>
+
+<h3>3.1 Design variations to mention</h3>
+<ul>
+  <li>Single-gun vs dual-gun dispensers sharing one power cabinet (power sharing / dynamic allocation).</li>
+  <li>Integrated (all-in-one) chargers vs split power-cabinet + dispenser architectures.</li>
+  <li>Bidirectional (V2G-capable) units replace one-way DC/DC modules with bidirectional topologies and add grid-interaction logic.</li>
+  <li>Solar + battery-buffered sites add a site controller and change the AC input path entirely.</li>
+</ul>
+</div>
+
+<!-- ============ SECTION 4 ============ -->
+<div class="page pb">
+<h1>4. EV-Side Hardware</h1>
+
+<div class="svgwrap">
+<svg viewBox="0 0 760 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+<defs><marker id="a2" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#0b3d6d"/></marker></defs>
+<text x="380" y="20" text-anchor="middle" font-size="15" font-weight="bold" fill="#0b3d6d">Figure 12 — EV-side hardware relevant to DC fast charging</text>
+<g stroke="#0b3d6d" stroke-width="1.3">
+<rect x="20" y="40" width="110" height="70" rx="8" fill="#eef3f9"/>
+<rect x="160" y="40" width="120" height="70" rx="4" fill="#fff"/>
+<rect x="310" y="40" width="120" height="70" rx="4" fill="#fff"/>
+<rect x="460" y="40" width="130" height="70" rx="4" fill="#fff"/>
+<rect x="620" y="40" width="120" height="70" rx="4" fill="#fff"/>
+<rect x="20" y="170" width="200" height="80" rx="4" fill="#fff8e8" stroke="#b26a00"/>
+<rect x="250" y="170" width="180" height="80" rx="4" fill="#eef7ee" stroke="#2e7d32"/>
+<rect x="460" y="170" width="160" height="80" rx="4" fill="#fdecea" stroke="#a33"/>
+<rect x="650" y="170" width="90" height="80" rx="4" fill="#fff"/>
+</g>
+<g font-size="9" fill="#1a1f2e" text-anchor="middle">
+<text x="75" y="65" font-weight="bold">CCS2 Inlet</text><text x="75" y="78" font-size="8">DC+, DC−, CP,</text><text x="75" y="88" font-size="8">PP, PE</text><text x="75" y="100" font-size="7.5" fill="#666">connector lock in inlet</text>
+<text x="220" y="60" font-weight="bold">EVCC</text><text x="220" y="72" font-size="8">EV Communication</text><text x="220" y="82" font-size="8">Controller</text><text x="220" y="94" font-size="8">+ PLC modem</text><text x="220" y="104" font-size="7.5" fill="#666">talks to SECC</text>
+<text x="370" y="60" font-weight="bold">BMS</text><text x="370" y="72" font-size="8">measures cells,</text><text x="370" y="82" font-size="8">computes charge</text><text x="370" y="92" font-size="8">limits &amp; requests</text>
+<text x="525" y="60" font-weight="bold">VCU</text><text x="525" y="72" font-size="8">vehicle-level state,</text><text x="525" y="82" font-size="8">coordinates charging</text><text x="525" y="92" font-size="8">with drive system</text>
+<text x="680" y="60" font-weight="bold">HV Battery</text><text x="680" y="72" font-size="8">pack: cells,</text><text x="680" y="82" font-size="8">400 V or 800 V</text><text x="680" y="92" font-size="8">class (arch-dep.)</text>
+<text x="120" y="192" font-weight="bold" fill="#7a4a00">Battery pack sensors</text><text x="120" y="205" font-size="8">pack V, pack I, cell voltages,</text><text x="120" y="215" font-size="8">cell temperatures (many NTCs)</text><text x="120" y="227" font-size="8">→ feed BMS decisions</text>
+<text x="340" y="192" font-weight="bold" fill="#1e5b23">EV contactors + pre-charge</text><text x="340" y="205" font-size="8">pack-side contactors and</text><text x="340" y="215" font-size="8">pre-charge relay/resistor;</text><text x="340" y="227" font-size="8">welding detection at EV side</text>
+<text x="540" y="192" font-weight="bold" fill="#7a2222">EV IMD</text><text x="540" y="205" font-size="8">onboard insulation monitor;</text><text x="540" y="215" font-size="8">during DC charging, EV-IMD</text><text x="540" y="227" font-size="8">handed over per IEC 61851-23</text><text x="540" y="240" font-size="7.5" fill="#666">EV-side monitor function <span class="cite">[TI SLUAB09 — R11]</span></text>
+<text x="695" y="192" font-weight="bold">OBC</text><text x="695" y="205" font-size="8">for AC charging;</text><text x="695" y="215" font-size="8">bypassed in DC</text><text x="695" y="225" font-size="8">fast charging</text>
+</g>
+<g stroke="#0b3d6d" stroke-width="2" fill="none">
+<line x1="130" y1="75" x2="158" y2="75" marker-end="url(#a2)"/><line x1="280" y1="75" x2="308" y2="75" marker-end="url(#a2)"/><line x1="430" y1="75" x2="458" y2="75" marker-end="url(#a2)"/><line x1="590" y1="75" x2="618" y2="75" marker-end="url(#a2)"/>
+<line x1="370" y1="110" x2="370" y2="168" marker-end="url(#a2)" stroke-dasharray="4 3"/><line x1="220" y1="110" x2="220" y2="130" stroke-dasharray="4 3"/><line x1="220" y1="130" x2="420" y2="130" stroke-dasharray="4 3"/><line x1="420" y1="130" x2="420" y2="168" marker-end="url(#a2)" stroke-dasharray="4 3"/>
+</g>
+<text x="240" y="146" font-size="8" fill="#555">BMS sets charging limits &amp; current requests; EVCC carries them in V2G messages</text>
+<text x="380" y="286" font-size="9.5" fill="#0b3d6d" font-weight="bold">Who owns what (common split — details vary by OEM):</text>
+<text x="380" y="302" font-size="9" fill="#223">• EV: inlet, connector lock (EV side), BMS limits/requests, EV contactors/pre-charge, EVCC+PLC modem, EV IMD, welding detection.</text>
+<text x="380" y="318" font-size="9" fill="#223">• Charger: cable &amp; plug lock, power conversion, EVSE-side IMD/cable check, pre-charge of output to battery voltage, session metering/billing.</text>
+<text x="380" y="334" font-size="9" fill="#223">• Shared over protocol: EV notifies ready-states and requests (CurrentDemand); charger reports EVSE limits, current limits and status/fault codes.</text>
+<text x="380" y="354" font-size="8.6" fill="#666" font-style="italic">Note: the charger never "talks to the BMS directly" — it talks to the EVCC; the EVCC and BMS exchange information over the vehicle's internal network (e.g. CAN).</text>
+</svg>
+</div>
+<div class="figcap">Figure 12. EV-side block diagram. Internal vehicle buses (CAN etc.) connect EVCC↔BMS↔VCU; only EVCC talks externally to the charger's SECC.</div>
+
+<h3>4.1 Component explanations</h3>
+<ul>
+  <li><b>CCS2 charging inlet</b>: the vehicle-side socket with DC+, DC−, CP, PP and PE contacts; includes the EV-side connector lock actuator in many designs <i>(lock location — inlet vs cable — is architecture-dependent)</i>.</li>
+  <li><b>BMS</b>: measures cell voltages, pack current and temperatures; computes the safe operating window (max/min voltage, max current, max temperature) and decides the <i>current request</i> each second of the session. It is the source of truth for what the battery can accept.</li>
+  <li><b>VCU</b>: coordinates vehicle-level state (drive, charge, sleep), decides when charging is allowed, manages thermal preconditioning in some vehicles <i>(varies by OEM)</i>.</li>
+  <li><b>HV battery pack</b>: 400 V-class or 800 V-class cells (pack-level nominal voltage e.g. ~400 V or ~700–800 V, <i>architecture-dependent</i>); the reason chargers need a wide, programmable output voltage range.</li>
+  <li><b>Battery sensors</b>: pack voltage, pack current, per-cell voltages, many temperature points; feed the BMS's protection and request calculations.</li>
+  <li><b>EV contactors + pre-charge</b>: connect the pack to the inlet; EV pre-charges its inverter/link before closing main contactors; the EV performs its own welding detection. (Do not confuse EV-side pre-charge with EVSE-side pre-charge of the output to battery voltage — both exist, at opposite ends of the cable.)</li>
+  <li><b>EV insulation monitoring</b>: the vehicle has its own isolation monitor for driving; during DC charging per IEC 61851-23 practice, the EV-IMD is de-activated and the EVSE-side IMD takes over, with a defined handover sequence <span class="cite">[TI SLUAB09 — R11]</span> <i>(summary of standard practice — flag as such)</i>.</li>
+  <li><b>EVCC (EV Communication Controller)</b>: the vehicle's modem+protocol processor that runs SLAC and DIN 70121/ISO 15118 on the EV side. It is the <i>only</i> vehicle entity the charger communicates with over the cable; the BMS↔EVCC link is internal (e.g. CAN) <i>(typical)</i>.</li>
+</ul>
+</div>
+
+<!-- ============ SECTION 5 ============ -->
+<div class="page pb">
+<h1>5. EV ↔ Charger Communication: Complete Protocol Explanation</h1>
+
+<h3>5.1 CCS2 connector pins</h3>
+<div class="svgwrap">
+<svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+<text x="380" y="18" text-anchor="middle" font-size="14" font-weight="bold" fill="#0b3d6d">Figure 2 — CCS2 connector contact layout (vehicle inlet, front view, schematic)</text>
+<!-- connector outline -->
+<rect x="250" y="40" width="260" height="230" rx="26" fill="#eef3f9" stroke="#0b3d6d" stroke-width="2"/>
+<rect x="318" y="150" width="124" height="96" rx="14" fill="#fff" stroke="#0b3d6d" stroke-width="2"/>
+<!-- top pins -->
+<g stroke="#333" stroke-width="2">
+<line x1="300" y1="80" x2="300" y2="130"/><line x1="460" y1="80" x2="460" y2="130"/>
+</g>
+<circle cx="300" cy="72" r="13" fill="#c94b4b" stroke="#7a2222"/><circle cx="460" cy="72" r="13" fill="#4b6fc9" stroke="#22397a"/>
+<!-- CP PP -->
+<circle cx="300" cy="170" r="10" fill="#e8b93c" stroke="#8a6a00"/><circle cx="460" cy="170" r="10" fill="#7dc87d" stroke="#1e5b23"/>
+<line x1="300" y1="180" x2="300" y2="212" stroke="#333" stroke-width="2"/><line x1="460" y1="180" x2="460" y2="212" stroke="#333" stroke-width="2"/>
+<!-- PE -->
+<rect x="362" y="52" width="36" height="52" rx="6" fill="#555"/>
+<!-- labels -->
+<g font-size="10" fill="#1a1f2e">
+<text x="240" y="66" text-anchor="end" font-weight="bold">DC+ (DC positive)</text><text x="240" y="77" text-anchor="end" font-size="8">energy from charger DC/DC output</text>
+<text x="520" y="66" font-weight="bold">DC− (DC negative)</text><text x="520" y="77" font-size="8">return path of energy circuit</text>
+<text x="240" y="166" text-anchor="end" font-weight="bold">CP — Control Pilot</text><text x="240" y="177" text-anchor="end" font-size="8">IEC 61851 PWM + PLC carrier (with PE)</text>
+<text x="520" y="166" font-weight="bold">PP — Proximity Pilot</text><text x="520" y="177" font-size="8">plug presence / cable rating (resistor-coded)</text>
+<text x="380" y="66" text-anchor="middle" font-weight="bold" fill="#fff">PE</text><text x="380" y="118" text-anchor="middle" font-size="8" fill="#555">Protective Earth:</text><text x="380" y="128" text-anchor="middle" font-size="8" fill="#555">safety + PLC return</text>
+</g>
+<text x="380" y="272" text-anchor="middle" font-size="9" fill="#666" font-style="italic">AC pins (L1/L2/L3, N) exist in the full CCS2 inlet for AC use; in DC sessions the energy flows on DC+/DC− only. Pin arrangement shown schematically, not to scale.</text>
+</svg>
+</div>
+<div class="figcap">Figure 2. CCS2 contact functions. The CP line carries both the IEC 61851 PWM and the HomePlug Green PHY PLC signal (injected CP-to-PE).</div>
+
+<h3>5.2 Purpose of CP and PP</h3>
+<p><b>CP</b> is the charger→vehicle "conversation wire": the EVSE applies a +12 V/−12 V square wave at 1 kHz (when appropriate), and the EV changes the <i>load resistance</i> it presents on that line to signal its state. The EVSE measures the resulting voltage level to detect the state. On top of this, in CCS DC charging, a PLC modem on both sides injects broadband data onto the CP–PE loop. <b>PP</b> tells the charger that a plug is physically inserted (and in AC charging, via a resistor code, the current rating of the cable). PP is a simple, low-speed signal; CP is the safety-critical signalling link <span class="cite">[HDT CP/PP FAQ — R2]</span> <i>(secondary summary)</i>.</p>
+
+<h3>5.3 Control Pilot states and PWM (IEC 61851-1)</h3>
+<div class="svgwrap">
+<svg viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+<defs><marker id="a3" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0b3d6d"/></marker></defs>
+<text x="380" y="18" text-anchor="middle" font-size="14" font-weight="bold" fill="#0b3d6d">Figure 3 — Control Pilot states (voltage levels) and 1 kHz PWM concept</text>
+<!-- left: state bar -->
+<text x="60" y="44" font-size="11" font-weight="bold" fill="#0b3d6d">CP states (nominal ±1 V) <span class="cite" font-size="8">[Geocadra summary — R1]</span></text>
+<g font-size="9.5">
+<rect x="60" y="60" width="150" height="26" fill="#fdecea" stroke="#a33"/><text x="70" y="77">State A: +12 V — no EV</text>
+<rect x="60" y="92" width="150" height="26" fill="#fff4dd" stroke="#b26a00"/><text x="70" y="109">State B: +9 V — EV present (PWM)</text>
+<rect x="60" y="124" width="150" height="26" fill="#eef7ee" stroke="#2e7d32"/><text x="70" y="141">State C: +6 V — charging (PWM)</text>
+<rect x="60" y="156" width="150" height="26" fill="#f3eafa" stroke="#7a3aa0"/><text x="70" y="173">State D: +3 V — ventilation (rare)</text>
+<rect x="60" y="188" width="150" height="26" fill="#eee" stroke="#555"/><text x="70" y="205">State E: 0 V — EVSE error/no power</text>
+<rect x="60" y="220" width="150" height="26" fill="#eee" stroke="#555"/><text x="70" y="237">State F: −12 V — pilot fault</text>
+</g>
+<!-- right: PWM diagram -->
+<text x="480" y="44" font-size="11" font-weight="bold" fill="#0b3d6d">1 kHz PWM on CP (EVSE-generated)</text>
+<g stroke="#0b3d6d" stroke-width="1.5" fill="none">
+<path d="M330 120 L360 120 L360 80 L470 80 L470 120 L580 120 L580 80 L690 80 L690 120 L720 120"/>
+</g>
+<g stroke="#999" stroke-dasharray="3 3"><line x1="330" y1="80" x2="720" y2="80"/><line x1="330" y1="120" x2="720" y2="120"/></g>
+<text x="322" y="84" text-anchor="end" font-size="9">+12 V</text><text x="322" y="123" text-anchor="end" font-size="9">−12 V</text>
+<line x1="360" y1="70" x2="360" y2="150" stroke="#c94b4b" stroke-dasharray="3 3"/><line x1="470" y1="70" x2="470" y2="150" stroke="#c94b4b" stroke-dasharray="3 3"/>
+<line x1="360" y1="62" x2="470" y2="62" stroke="#c94b4b" stroke-width="1.5" marker-end="url(#a3)" marker-start="url(#a3)"/>
+<text x="415" y="58" text-anchor="middle" font-size="9" fill="#c94b4b">duty cycle D (e.g. 40%)</text>
+<text x="525" y="70" font-size="8" fill="#555">1 ms period (1 kHz)</text>
+<text x="525" y="140" font-size="8.5" fill="#555">In States B/C the EVSE transmits this square wave.</text>
+<text x="525" y="152" font-size="8.5" fill="#555">In CCS the duty cycle's current-advertising role is largely</text>
+<text x="525" y="163" font-size="8.5" fill="#555">superseded by the digital session (EV/charger exchange limits</text>
+<text x="525" y="174" font-size="8.5" fill="#555">precisely via ChargeParameterDiscovery / CurrentDemand).</text>
+<!-- how EV signals state: resistor -->
+<text x="60" y="276" font-size="10" font-weight="bold" fill="#0b3d6d">How the EV changes state:</text>
+<text x="60" y="292" font-size="9">The EV switches resistances (e.g. 2.74 kΩ → B, 882 Ω → C in the IEC 61851-1 scheme) between CP and PE,</text>
+<text x="60" y="304" font-size="9">plus a diode so negative half-waves are blocked — the EVSE also checks this diode to detect a non-genuine EV/pilot fault.</text>
+<text x="60" y="316" font-size="8.6" fill="#666" font-style="italic">Secondary-summary levels; verify exact resistor values against IEC 61851-1 when designing (values above are the widely published nominal ones).</text>
+</svg>
+</div>
+<div class="figcap">Figure 3. CP concept: EVSE-generated ±12 V, 1 kHz PWM; EV loads the line with resistors to announce State B/C/D; EVSE reads voltage; diode check detects pilot-line faults.</div>
+
+<h4>State table</h4>
+<table>
+<tr><th>State</th><th>Nominal CP voltage</th><th>Meaning</th><th>EVSE action</th></tr>
+<tr><td><b>A</b></td><td>+12 V (no PWM)</td><td>No vehicle connected</td><td>Idle</td></tr>
+<tr><td><b>B</b></td><td>+9 V (PWM present)</td><td>Vehicle detected, not ready</td><td>Connector may lock; no power yet</td></tr>
+<tr><td><b>C</b></td><td>+6 V (PWM present)</td><td>Vehicle ready / charging (closes its switch)</td><td>Energize power contacts</td></tr>
+<tr><td><b>D</b></td><td>+3 V (PWM present)</td><td>Ventilation required (rare; legacy lead-acid scenario)</td><td>Energize with ventilation requirement</td></tr>
+<tr><td><b>E</b></td><td>0 V</td><td>EVSE error / no power</td><td>Stop power</td></tr>
+<tr><td><b>F</b></td><td>−12 V</td><td>Pilot fault (e.g. diode short)</td><td>Stop power, latch fault</td></tr>
+</table>
+<p class="small">Source: <span class="cite">[Geocadra IEC 61851 summary — R1]</span>, <span class="cite">[HDT — R2]</span> (secondary summaries of IEC 61851-1; confirm against the standard itself for design work).</p>
+<p><b>PWM duty cycle</b>: in basic IEC 61851 (AC) charging the PWM duty cycle advertises the maximum current available (e.g. specific % bands map to ampere ranges). In <b>CCS DC</b> charging the duty cycle still exists as part of CP behaviour, but the actual current limits are negotiated digitally in the PLC session (ChargeParameterDiscovery / CurrentDemand messages) — a distinction interviewers like to probe <span class="cite">[Lewandowski PLC-over-IEC-61851 paper — R9; Geocadra — R1]</span>. <span class="kannada">ಸರಳವಾಗಿ: CP ತಂತಿ "ನಾನು ಎಷ್ಟು ಕರೆಂಟ್ ಕೊಡಲು ಸಾಧ್ಯ" ಎಂಬುದನ್ನು PWM ಮೂಲಕ ಹೇಳುತ್ತದೆ; ನಿಖರವಾದ ಮೌಲ್ಯಗಳನ್ನು PLC ಡಿಜಿಟಲ್ ಸಂಭಾಷಣೆಯಲ್ಲಿ ಚರ್ಚಿಸಲಾಗುತ್ತದೆ.</span></p>
+
+<h3>5.4 Power Line Communication (PLC) and HomePlug Green PHY</h3>
+<p>ISO 15118-3 (and its DIN 70121 predecessor in practice) specifies <b>HomePlug Green PHY (HPGP)</b> as the physical/data-link layer: an OFDM-based power-line modem technology operating in the ≈2–30 MHz band, injected between the CP line and PE on both the EV (EVCC) and charger (SECC) sides. HPGP is a low-power variant of HomePlug AV, designed for low-energy, high-reliability links <span class="cite">[ISO 15118-3 summary — R4; EV Range PLC explainer — R8]</span>.</p>
+
+<h3>5.5 SLAC — Signal Level Attenuation Characterisation</h3>
+<p>Because the CP/PE medium is shared, before any digital session the EVCC and SECC must discover each other and pair. <b>SLAC</b> is that matching procedure: the EV sends (as CM_SLC_PARAM) discovery frames; the EVSE replies with attenuation (sound) profiles; the EV picks the matching EVSE, they exchange matching confirmation (CM_SLAC_MATCH) and then establish the logical network with keys. After SLAC comes link establishment (CM_SETKEY etc.), IP setup (SLAAC), TCP, TLS (if used) and then the V2G application protocol. SLAC verifies the connection path so that the right car talks to the right charger <span class="cite">[ISO 15118-3 summary — R4]</span>.</p>
+
+<h3>5.6 EVCC, SECC and the protocol stack</h3>
+<div class="svgwrap">
+<svg viewBox="0 0 760 330" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+<text x="380" y="18" text-anchor="middle" font-size="14" font-weight="bold" fill="#0b3d6d">Figure 4 — Protocol stack across EV and charger (CCS2 DC, ISO 15118-2 flavour)</text>
+<g stroke="#0b3d6d" stroke-width="1.3" fill="none">
+<rect x="60" y="40" width="240" height="34" fill="#eef7ee"/><rect x="460" y="40" width="240" height="34" fill="#eef3f9"/>
+<rect x="60" y="78" width="240" height="30" fill="#eef7ee"/><rect x="460" y="78" width="240" height="30" fill="#eef3f9"/>
+<rect x="60" y="112" width="240" height="30" fill="#eef7ee"/><rect x="460" y="112" width="240" height="30" fill="#eef3f9"/>
+<rect x="60" y="146" width="240" height="30" fill="#eef7ee"/><rect x="460" y="146" width="240" height="30" fill="#eef3f9"/>
+<rect x="60" y="180" width="240" height="30" fill="#eef7ee"/><rect x="460" y="180" width="240" height="30" fill="#eef3f9"/>
+<rect x="60" y="214" width="240" height="30" fill="#eef7ee"/><rect x="460" y="214" width="240" height="30" fill="#eef3f9"/>
+<rect x="60" y="248" width="240" height="30" fill="#eef7ee"/><rect x="460" y="248" width="240" height="30" fill="#eef3f9"/>
+</g>
+<g font-size="9.5" fill="#1a1f2e">
+<text x="180" y="62" text-anchor="middle" font-weight="bold" fill="#1e5b23">EV (EVCC)</text>
+<text x="580" y="62" text-anchor="middle" font-weight="bold" fill="#0b3d6d">Charger (SECC)</text>
+<text x="72" y="98">Application: V2G messages (ISO 15118-2 / DIN 70121)</text>
+<text x="472" y="98">Application: V2G messages (SECC side)</text>
+<text x="72" y="132">EXI encoding, V2GTP transport</text>
+<text x="472" y="132">EXI encoding, V2GTP transport</text>
+<text x="72" y="166">TLS (optional; ISO 15118-2 PnC uses it)</text>
+<text x="472" y="166">TLS (optional)</text>
+<text x="72" y="200">TCP, IPv6 (SLAAC)</text>
+<text x="472" y="200">TCP, IPv6 (SLAAC)</text>
+<text x="72" y="234">HomePlug Green PHY MAC/PHY (SLAC)</text>
+<text x="472" y="234">HomePlug Green PHY MAC/PHY (SLAC)</text>
+<text x="72" y="268">PLC coupling on CP–PE</text>
+<text x="472" y="268">PLC coupling on CP–PE + EVSE modem</text>
+</g>
+<line x1="300" y1="98" x2="460" y2="98" stroke="#a33" stroke-width="2" marker-end="url(#a3)" marker-start="url(#a3)"/>
+<text x="380" y="92" text-anchor="middle" font-size="8.5" fill="#a33">logical session (JSON/EXI messages)</text>
+<line x1="300" y1="292" x2="460" y2="292" stroke="#a33" stroke-width="4"/>
+<text x="380" y="308" text-anchor="middle" font-size="9" fill="#a33">physical medium: the CP and PE wires of the same charging cable</text>
+<text x="380" y="324" text-anchor="middle" font-size="8.5" fill="#666" font-style="italic">DIN 70121 ≈ same stack minus TLS/advanced security; ISO 15118-20 reuses the layered model with new messages (incl. bidirectional BPT).</text>
+</svg>
+</div>
+<div class="figcap">Figure 4. Layered view: SLAC/HPGP at the bottom, TCP/IP in the middle, EXI-encoded V2G messages at the top.</div>
+
+<ul>
+  <li><b>EVCC</b> = EV Communication Controller (vehicle side). <b>SECC</b> = Supply Equipment Communication Controller (charger side). They are the two endpoints of the PLC session.</li>
+  <li><b>DIN 70121</b>: the earlier, DC-only CCS protocol. Supports the core charging messages but lacks full PKI-based Plug &amp; Charge and end-to-end TLS security; still the most widely deployed baseline for DC CCS <span class="cite">[Jointcharging DIN 70121 explainer — R6]</span>. <i>One widely republished summary claims DIN 70121 "supports simple TLS" — the majority description (R4, R6, renco R-31) says TLS/Plug&amp;Charge security is <b>not</b> part of DIN 70121; treat exact security scope as version-dependent and verify against the DIN document if it matters.</i></li>
+  <li><b>ISO 15118-2</b>: adds Plug &amp; Charge (PKI certificates), TLS transport, AC and DC charging, scheduling <span class="cite">[ISO 15118-2 OBP — R5]</span>.</li>
+  <li><b>ISO 15118-20</b>: the 2022 second generation — new message set, bidirectional power transfer (BPT/V2H etc.), improved plug &amp; charge, AC/DC/WPT (wireless) modes <span class="cite">[ISO 15118-20 doc — R14]</span>. Deployment is ramping in 2024–2026 vehicles.</li>
+  <li><b>Not every vehicle or charger runs every protocol</b>: vehicles typically advertise DIN 70121 and/or ISO 15118-2 (rarely -20 yet); the charger picks the mutually supported version in <code>SupportedAppProtocol</code>. Older EVs may only do IEC 61851 CP (no PLC) on AC, and some non-CCS DC standards (e.g. GB/T, NACS variants) exist outside the CCS2 world.</li>
+</ul>
+
+<h3>5.7 High-level messages, limits and negotiation (what "the protocol" actually says)</h3>
+<p>The V2G application layer is a request/response message exchange. The DC-charging message flow below is from the Typhoon HIL reference implementation documentation of ISO 15118-2 <span class="cite">[R5]</span>:</p>
+<table>
+<tr><th style="width:26%;">Message (Req/Res pair)</th><th style="width:14%;">Phase</th><th>What it does, in plain English</th></tr>
+<tr><td><code>supportedAppProtocol</code></td><td>Setup</td><td>EV and charger agree which protocol version to speak (e.g. DIN 70121 vs ISO 15118-2).</td></tr>
+<tr><td><code>SessionSetup</code></td><td>Setup</td><td>Charger assigns a unique SessionID for this session.</td></tr>
+<tr><td><code>ServiceDiscovery</code></td><td>Identification</td><td>EV asks what the charger offers (energy modes, payment options).</td></tr>
+<tr><td><code>PaymentServiceSelection</code></td><td>Identification</td><td>EV picks the authentication method (e.g. Plug &amp; Charge vs external card).</td></tr>
+<tr><td><code>Authorization</code> (+ PaymentDetails / Certificate… for PnC)</td><td>Identification</td><td>Authenticate the user/vehicle; anti-replay checks.</td></tr>
+<tr><td><code>ChargeParameterDiscovery</code></td><td>Target setting</td><td>Exchange of max/min voltage and current limits of both sides + energy schedules.</td></tr>
+<tr><td><code>CableCheck</code></td><td>DC only</td><td>EV tells charger it is ready/locked; charger runs insulation test of the DC cable/output and reports status.</td></tr>
+<tr><td><code>PreCharge</code></td><td>DC only</td><td>Charger raises its output voltage to the EV's battery voltage (EV sends target voltage + max inrush current) so contactor closure sees ~0 V difference.</td></tr>
+<tr><td><code>PowerDelivery (Start)</code></td><td>Energy transfer</td><td>The "go" switch: EVSE energizes output; EV starts drawing current.</td></tr>
+<tr><td><code>CurrentDemand</code> (loop, ~every second or so)</td><td>Charging loop</td><td>EV continuously requests target voltage/current and receives EVSE-present limits, status and fault info. This is where dynamic adjustment happens.</td></tr>
+<tr><td><code>PowerDelivery (Stop)</code></td><td>End</td><td>EV signals pause/stop; charger ramps down.</td></tr>
+<tr><td><code>WeldingDetection</code></td><td>End</td><td>Contactor welding detection mechanism per IEC 61851.</td></tr>
+<tr><td><code>SessionStop</code></td><td>End</td><td>Closes the communication session cleanly.</td></tr>
+</table>
+<p><b>Charging limits vs actual output</b>: each side owns limits — the EV declares what its battery can accept (EVMaximumVoltageLimit, EVMaximumCurrentLimit…), the charger declares what it can deliver (EVSEMaximumVoltageLimit, EVSEMaximumCurrentLimit…). The <i>actual</i> operating point is the EV's current request inside the intersection of those limits, which the charger's control loop then realizes on the output. Status (EVSEStatusCode, e.g. <code>EVSE_IsolationMonitoringActive</code>, error codes) travels in the responses <span class="cite">[Typhoon HIL — R5; ISO 15118-2 — R5b]</span>.</p>
+<p><b>Timeouts and faults</b>: every message has a performance time; if the peer (or the PLC link) doesn't respond in time, the sequence fails and the session is terminated safely. Loss of communication causes the EVSE to stop power delivery (e.g. after the defined sequence/timeout in IEC 61851-23) — the exact timeout ladder is standard-defined and version/product dependent.</p>
+<p><b>Security / Plug &amp; Charge</b>: ISO 15118-2 with TLS + PKI lets the vehicle authenticate with a contract certificate — no card or app; billing is bound to the vehicle identity. ISO 15118-20 extends and modernizes this. DIN 70121 sessions typically use external authentication (RFID/app) instead <span class="cite">[R6, R8]</span>.</p>
+
+<h3>5.8 Full communication sequence diagram</h3>
+<div class="svgwrap">
+<svg viewBox="0 0 760 640" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+<defs><marker id="a5" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0b3d6d"/></marker><marker id="a5r" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#a33"/></marker></defs>
+<text x="380" y="18" text-anchor="middle" font-size="14" font-weight="bold" fill="#0b3d6d">Figure 5 — EV ↔ Charger communication sequence (CCS2 DC, ISO 15118-2-style; DIN 70121 = same minus TLS/PnC)</text>
+<line x1="120" y1="34" x2="120" y2="620" stroke="#1e5b23" stroke-width="2"/>
+<line x1="640" y1="34" x2="640" y2="620" stroke="#0b3d6d" stroke-width="2"/>
+<text x="120" y="30" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#1e5b23">EV / BMS / EVCC</text>
+<text x="640" y="30" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#0b3d6d">Charger / SECC / Controller</text>
+<g font-size="8.6" fill="#1a1f2e">
+<line x1="120" y1="52" x2="640" y2="52" stroke="#333" stroke-width="1.6" marker-end="url(#a5)"/><text x="380" y="48" text-anchor="middle">1. Plug in → PP presence; CP State B; connector lock</text>
+<line x1="120" y1="76" x2="640" y2="76" stroke="#333" stroke-width="1.6" marker-end="url(#a5)"/><text x="380" y="72" text-anchor="middle">2. SLAC: CM_SLAC_PARM/ATTENUATE…/MATCH (pairing on CP–PE) <tspan fill="#666">[ISO 15118-3 — R4]</tspan></text>
+<line x1="120" y1="98" x2="640" y2="98" stroke="#333" stroke-width="1.6" marker-end="url(#a5)"/><text x="380" y="94" text-anchor="middle">3. Link: SDP/SLAAC → TCP → (TLS if used) → SupportedAppProtocol (version choice)</text>
+<line x1="120" y1="120" x2="640" y2="120" stroke="#333" stroke-width="1.6" marker-end="url(#a5)"/><text x="380" y="116" text-anchor="middle">4. SessionSetup (SessionID) · ServiceDiscovery · PaymentServiceSelection</text>
+<line x1="120" y1="142" x2="640" y2="142" stroke="#333" stroke-width="1.6" marker-end="url(#a5)"/><text x="380" y="138" text-anchor="middle">5. Authorization / PnC certificate exchange (ISO 15118-2 with TLS)</text>
+<line x1="120" y1="168" x2="640" y2="168" stroke="#a33" stroke-width="1.6" marker-end="url(#a5r)" marker-start="url(#a5r)"/><text x="380" y="164" text-anchor="middle" fill="#a33">6. ChargeParameterDiscovery: EV limits ↔ EVSE limits, schedules</text>
+<line x1="640" y1="192" x2="120" y2="192" stroke="#a33" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#a5r)"/><text x="380" y="188" text-anchor="middle" fill="#a33">7. CableCheck loop: EVSE applies test V; IMD measures Ω; status → EV (repeat till OK)</text>
+<line x1="120" y1="216" x2="640" y2="216" stroke="#a33" stroke-width="1.6" marker-end="url(#a5r)"/><text x="380" y="212" text-anchor="middle" fill="#a33">8. PreCharge: EV sends target V (=battery V) + max inrush I; charger ramps output to match</text>
+<line x1="640" y1="240" x2="120" y2="240" stroke="#a33" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#a5r)"/><text x="380" y="236" text-anchor="middle" fill="#a33">9. PreChargeRes: output ≈ battery V → EV closes its contactors (CP stays B until ready)</text>
+<line x1="120" y1="264" x2="640" y2="264" stroke="#2e7d32" stroke-width="2" marker-end="url(#a5)"/><text x="380" y="260" text-anchor="middle" fill="#1e5b23" font-weight="bold">10. PowerDelivery(Start) + CP → State C: EVSE contactors close, energy flows</text>
+<g fill="#1e5b23">
+<line x1="120" y1="292" x2="640" y2="292" stroke="#1e5b23" stroke-width="1.6" marker-end="url(#a5)"/><text x="380" y="288" text-anchor="middle">11. CurrentDemandReq: EV requests (V, I) ← → CurrentDemandRes: EVSE limits + status</text>
+<line x1="120" y1="312" x2="640" y2="312" stroke="#1e5b23" stroke-width="1.6" marker-end="url(#a5)"/><text x="380" y="308" text-anchor="middle">12. … repeat ~every 1 s (loop) — dynamic current, SOC rise, thermal derating …</text>
+<line x1="120" y1="332" x2="640" y2="332" stroke="#1e5b23" stroke-width="1.6" marker-end="url(#a5)"/><text x="380" y="328" text-anchor="middle">13. … loop continues until SOC/target/energy reached or user stops …</text>
+</g>
+<line x1="120" y1="360" x2="640" y2="360" stroke="#a33" stroke-width="2" marker-end="url(#a5r)"/><text x="380" y="356" text-anchor="middle" fill="#a33" font-weight="bold">14. PowerDelivery(Stop): EV ends charging; charger ramps current to 0, opens contactors</text>
+<line x1="640" y1="384" x2="120" y2="384" stroke="#a33" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#a5r)"/><text x="380" y="380" text-anchor="middle" fill="#a33">15. WeldingDetection: verify contactors are not welded (voltage/current signatures)</text>
+<line x1="120" y1="408" x2="640" y2="408" stroke="#333" stroke-width="1.6" marker-end="url(#a5)"/><text x="380" y="404" text-anchor="middle">16. SessionStop: session closed; EVSE discharges output; CP → State B; unlock plug</text>
+</g>
+<rect x="30" y="430" width="700" height="180" rx="6" fill="#f6f9fc" stroke="#8aa"/>
+<g font-size="9.3" fill="#223">
+<text x="44" y="452" font-weight="bold" fill="#0b3d6d">Layer separation (read with the diagram):</text>
+<text x="44" y="470">• Physical/control-pilot layer (steps 1, 9-10, 16): IEC 61851-1 CP states + PP — safety signalling, independent of the digital session.</text>
+<text x="44" y="488">• PLC link layer (steps 2–3): SLAC + HPGP — "find my charger, build an IP link". No charging semantics yet.</text>
+<text x="44" y="506">• High-level protocol (steps 4–8, 11–16): DIN 70121 / ISO 15118 messages — authentication, limits, requests, statuses.</text>
+<text x="44" y="524">• Power-stage control (implicit behind 7–14): the charger controller translates every agreed value into PWM setpoints and contactor commands.</text>
+<text x="44" y="548" font-weight="bold" fill="#0b3d6d">Architecture-dependent caveats:</text>
+<text x="44" y="566">• The charger never talks to the BMS directly — only via EVCC (vehicle-internal mapping to BMS is OEM-specific).</text>
+<text x="44" y="584">• Some EVs ramp the CP to State C earlier/later; exact CP timing interplay with the protocol is standard-bounded but implementation-tuned.</text>
+<text x="44" y="602">• Message timing (e.g. V2G_SECC_Sequence_Timeout values) is defined in the standards; treat exact numbers as version-dependent.</text>
+</g>
+</svg>
+</div>
+<div class="figcap">Figure 5. Numbered EV↔charger sequence. Green = energy-transfer loop; red = safety-critical steps. Sequence per ISO 15118-2 documentation <span class="cite">[R5]</span>.</div>
+</div>
+
+<!-- ============ SECTION 6 ============ -->
+<div class="page pb">
+<h1>6. Charging Sequence: Step-by-Step</h1>
+<p>The 17 stages you asked about, mapped to what happens electrically and in software. (Stage numbers below match your list.)</p>
+<table>
+<tr><th style="width:6%;">#</th><th style="width:20%;">Stage</th><th style="width:44%;">What happens (technical)</th><th style="width:30%;">Simple language</th></tr>
+<tr><td>1</td><td>Cable connection</td><td>User plugs CCS2 gun; PP contact made; charger detects plug presence; vehicle wakes the EVCC (CP line power / PLC wake).</td><td>"ಪ್ಲಗ್ ಸಿಕ್ಕಿಸಿದೆ" — the plug goes in.</td></tr>
+<tr><td>2</td><td>Connector &amp; safety checks</td><td>Connector lock actuation, plug temperature check, EVSE self-tests, PE presence verified.</td><td>The charger checks the plug is seated, locked and healthy.</td></tr>
+<tr><td>3</td><td>CP state detection</td><td>EVSE sees State B (+9 V PWM); diode check passed; PWM transmitted per IEC 61851-1 <span class="cite">[R1, R2]</span>.</td><td>The car "raises its hand" on the CP wire.</td></tr>
+<tr><td>4</td><td>PLC link establishment</td><td>EVCC modems (both sides) detect the link; CM_SLAC_PARM.REQ etc. begin.</td><td>The two computers find each other through the cable.</td></tr>
+<tr><td>5</td><td>SLAC matching</td><td>Attenuation characterisation, CM_SLAC_MATCH, key exchange; link up; IPv6/TCP established.</td><td>They agree "I am talking to the right charger/car".</td></tr>
+<tr><td>6</td><td>Protocol/session negotiation</td><td>SupportedAppProtocol → version; SessionSetup → SessionID; ServiceDiscovery; PaymentServiceSelection; Authorization (or PnC).</td><td>Handshake: who are you, how do we pay.</td></tr>
+<tr><td>7</td><td>Capability exchange</td><td>ChargeParameterDiscovery: EV max/min V, max I, energy needs vs EVSE output window (e.g. 150–1000 V, 0–500 A <i>illustrative</i>).</td><td>Both sides state their limits honestly.</td></tr>
+<tr><td>8</td><td>Parameter negotiation</td><td>Target SOC, energy request, schedule (SAScheduleTuple) agreed; EVSE declares it can support the plan.</td><td>Deal: this much energy by this time.</td></tr>
+<tr><td>9</td><td>Insulation &amp; safety checks</td><td>CableCheck loop: EVSE applies test voltage through IMD; insulation resistance measured against thresholds (Ω/V rule of thumb, edition-dependent); EV confirms lock/ready <span class="cite">[R10]</span>.</td><td>Leakage test of the cable before real power.</td></tr>
+<tr><td>10</td><td>Pre-charge / voltage matching</td><td>PreCharge: charger regulates output to EV battery voltage within requested inrush limit; EVSE output ≈ pack voltage.</td><td>Match the two voltages so closing the switch doesn't spark.</td></tr>
+<tr><td>11</td><td>Contactor operation</td><td>EV closes its contactors (ΔV≈0); EVSE closes output contactors; CP → State C at the defined point.</td><td>The switches close.</td></tr>
+<tr><td>12</td><td>Controlled power delivery</td><td>PowerDelivery(Start) confirmed; charger current ramp per request; control loops track (V, I) setpoints.</td><td>Power flows, under control.</td></tr>
+<tr><td>13</td><td>Continuous monitoring</td><td>Every loop: output V/I, temperatures, IMD, coolant, DC-link plausibility; watchdogs; anomaly counters.</td><td>Constant health checks.</td></tr>
+<tr><td>14</td><td>Dynamic adjustment</td><td>Each CurrentDemand message updates the request; EV may reduce current (thermal, cell-voltage, balancing reasons); charger follows within milliseconds (electrical loop) + seconds (message loop).</td><td>The car keeps steering; the charger follows.</td></tr>
+<tr><td>15</td><td>Stop request</td><td>EV sends PowerDelivery(Stop) (target reached, user stop, or fault), or EVSE terminates on fault/backend stop.</td><td>Someone says "enough".</td></tr>
+<tr><td>16</td><td>Ramp-down &amp; safe disconnect</td><td>Current → 0, contactors open, welding detection, output discharge, CP → State B, unlock, SessionStop.</td><td>Wind down, unlock, unplug.</td></tr>
+<tr><td>17</td><td>Fault handling / termination</td><td>On any fault: per-severity response (derate → pause → emergency stop); session terminated, reason logged (EVSEStatusCode / logs), backend notified.</td><td>If something is wrong, stop safely and record why.</td></tr>
+</table>
+
+<h3>6.1 State-machine diagram</h3>
+<div class="svgwrap">
+<svg viewBox="0 0 760 430" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+<defs><marker id="a6" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#0b3d6d"/></marker><marker id="a6r" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#a33"/></marker></defs>
+<text x="380" y="18" text-anchor="middle" font-size="14" font-weight="bold" fill="#0b3d6d">Figure 6 — Simplified charger session state machine (educational; real firmware adds many more guards)</text>
+<g stroke="#0b3d6d" stroke-width="1.4">
+<ellipse cx="90" cy="70" rx="62" ry="26" fill="#eef3f9"/>
+<ellipse cx="270" cy="70" rx="70" ry="26" fill="#fff4dd"/>
+<ellipse cx="470" cy="70" rx="74" ry="26" fill="#eef7ee"/>
+<ellipse cx="660" cy="70" rx="70" ry="26" fill="#eef7ee"/>
+<ellipse cx="660" cy="180" rx="74" ry="26" fill="#eef7ee"/>
+<ellipse cx="470" cy="180" rx="74" ry="26" fill="#eef7ee"/>
+<ellipse cx="270" cy="180" rx="70" ry="26" fill="#eef7ee"/>
+<ellipse cx="90" cy="180" rx="62" ry="26" fill="#dff3e0"/>
+<ellipse cx="380" cy="300" rx="90" ry="28" fill="#fdecea" stroke="#a33"/>
+<ellipse cx="90" cy="300" rx="70" ry="26" fill="#eee" stroke="#555"/>
+</g>
+<g font-size="9.6" text-anchor="middle" fill="#1a1f2e">
+<text x="90" y="74">IDLE (State A)</text><text x="270" y="74">PLUGGED /</text><text x="270" y="85">PREPARE (B)</text>
+<text x="470" y="74">SLAC +</text><text x="470" y="85">SESSION</text><text x="660" y="70">CABLE CHECK</text><text x="660" y="85">(IMD test)</text>
+<text x="660" y="184">PRECHARGE</text><text x="470" y="184">CHARGING (C)</text><text x="270" y="184">RAMP DOWN</text><text x="90" y="184">STOPPED/</text><text x="90" y="195">DONE</text>
+<text x="380" y="304" fill="#7a2222" font-weight="bold">FAULT (any state →)</text><text x="90" y="304">UNLOCK /</text><text x="90" y="315">IDLE</text>
+</g>
+<g stroke="#0b3d6d" stroke-width="1.5" fill="none">
+<path d="M152 70 L198 70" marker-end="url(#a6)"/>
+<path d="M340 70 L394 70" marker-end="url(#a6)"/>
+<path d="M544 70 L588 70" marker-end="url(#a6)"/>
+<path d="M660 96 L660 152" marker-end="url(#a6)"/>
+<path d="M660 206 L660 232 L470 232 L470 208" marker-end="url(#a6)"/>
+<path d="M470 154 L470 120 L540 96 L544 90" marker-end="url(#a6)" stroke="#a33" stroke-dasharray="5 3"/>
+<path d="M394 180 L342 180" marker-end="url(#a6)"/>
+<path d="M198 180 L154 180" marker-end="url(#a6)"/>
+<path d="M90 206 L90 272" marker-end="url(#a6)" stroke="#555"/>
+<path d="M660 250 L660 300 L472 300" marker-end="url(#a6r)" stroke="#a33" stroke-dasharray="5 3"/>
+<path d="M660 70 L660 44 L380 44 L380 272" marker-end="url(#a6r)" stroke="#a33" stroke-dasharray="5 3"/>
+<path d="M380 328 L90 328 L90 326" marker-end="url(#a6r)" stroke="#a33" stroke-dasharray="5 3"/>
+</g>
+<g font-size="8.4" fill="#555">
+<text x="175" y="62">plug + B</text><text x="367" y="62">link ok</text><text x="566" y="62">params ok</text><text x="668" y="128">IMD ok</text>
+<text x="575" y="228">V matched, EV ready</text><text x="368" y="172">stop</text><text x="176" y="172">done</text>
+<text x="430" y="346">supervision: comms timeout · over I/V/T · IMD fail · E-stop · contactor fault → enter FAULT, then safe shutdown</text>
+<text x="430" y="362" font-style="italic">Dashed red = fault transitions. Labels show the guard condition to leave each state.</text>
+</g>
+<text x="380" y="408" text-anchor="middle" font-size="9" fill="#666" font-style="italic">Educational simplification. Production state machines add sub-states (e.g. pre-charge retry, ventilation handling, EVSE re-negotiation) and per-standard timeout ladders.</text>
+</svg>
+</div>
+<div class="figcap">Figure 6. Charging session state machine (simplified educational model).</div>
+</div>
+
+<!-- ============ SECTION 7 ============ -->
+<div class="page pb">
+<h1>7. Buck Converter: Full Technical Explanation</h1>
+
+<h3>7.1 What it is and why it is used</h3>
+<p>A <b>buck (step-down) converter</b> is a switching DC/DC converter that produces an output voltage <i>lower</i> than its input, with high efficiency (typically 85–97% <i>typical, depends on design</i>) by switching an inductor at high frequency instead of burning voltage in a linear regulator. <span class="kannada">ಬಕ್ ಕನ್ವರ್ಟರ್ ಹೆಚ್ಚಿನ ವೋಲ್ಟೇಜನ್ನು ಕಡಿಮೆ ವೋಲ್ಟೇಜಾಗಿ ಪರಿವರ್ತಿಸುತ್ತದೆ — ಶಕ್ತಿ ವ್ಯರ್ಥವಾಗದಂತೆ ಇಂಡಕ್ಟರ್ ಮತ್ತು ಸ್ವಿಚ್ ಬಳಸಿ.</span> It is used everywhere a lower rail is needed from a higher one: 12 V→1.2 V CPU cores, 24 V→12 V auxiliaries, and inside charger systems (auxiliary rails, and the underlying principle of controlling average output voltage by PWM in many power stages).</p>
+
+<h3>7.2 Circuit and current paths</h3>
+<div class="svgwrap">
+<svg viewBox="0 0 760 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+<defs><marker id="a7" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0b3d6d"/></marker></defs>
+<text x="380" y="18" text-anchor="middle" font-size="14" font-weight="bold" fill="#0b3d6d">Figure 7 — Buck converter: circuit and ON/OFF current paths</text>
+<!-- common input -->
+<g font-size="9.5">
+<!-- top-left subcircuit: ON path -->
+<text x="190" y="42" text-anchor="middle" font-weight="bold" fill="#1e5b23">SWITCH ON (t = D·T): current path 1→2</text>
+<g stroke="#333" stroke-width="1.6" fill="none">
+<path d="M70 150 L70 70 L120 70"/>
+<path d="M160 70 L300 70 L300 100"/>
+<path d="M300 130 L300 170 L340 170"/>
+<path d="M340 170 L420 170"/>
+<path d="M300 170 L300 240"/>
+<path d="M420 170 L480 170 L480 240"/>
+<path d="M70 150 L70 260 L300 260 L480 260 L480 240" />
+</g>
+<!-- switch -->
+<rect x="120" y="58" width="40" height="24" fill="#dff3e0" stroke="#2e7d32" stroke-width="2"/>
+<text x="140" y="52" text-anchor="middle" font-size="9" fill="#1e5b23">Q1 MOSFET (ON)</text>
+<!-- inductor coil -->
+<path d="M300 100 q10 12 0 20 q-10 8 0 20 q10 12 0 20 q-10 8 0 20" stroke="#0b3d6d" stroke-width="2.5" fill="none"/>
+<text x="322" y="132" font-size="9.5" fill="#0b3d6d">L (inductor)</text>
+<!-- capacitor -->
+<line x1="460" y1="170" x2="500" y2="170" stroke="#333" stroke-width="1.6"/>
+<line x1="470" y1="180" x2="470" y2="230" stroke="#333" stroke-width="3"/><line x1="490" y1="180" x2="490" y2="230" stroke="#333" stroke-width="3"/>
+<text x="480" y="248" text-anchor="middle" font-size="9">C (output cap)</text>
+<line x1="500" y1="170" x2="480" y2="170" stroke="#333" stroke-width="1.6"/>
+<line x1="480" y1="260" x2="480" y2="170" stroke="#333" stroke-width="1.6" stroke-dasharray="1 0"/>
+<!-- Vin / Vout arrows -->
+<path d="M96 90 L96 230" stroke="#1e5b23" stroke-width="2.2" marker-end="url(#a7)"/>
+<text x="86" y="160" text-anchor="end" font-size="9.5" fill="#1e5b23" font-weight="bold">i_L rising</text>
+<text x="60" y="120" text-anchor="middle" font-size="10" font-weight="bold">Vin</text>
+<text x="540" y="140" font-size="10" font-weight="bold">Vout (load)</text>
+<text x="540" y="154" font-size="8.6" fill="#555">Q1 conducts; inductor sees (Vin − Vout)</text>
+<text x="540" y="166" font-size="8.6" fill="#555">inductor current ramps UP, storing energy</text>
+<text x="540" y="180" font-size="8.6" fill="#555">diode/catch off (reverse-biased)</text>
+<!-- second: OFF path -->
+<text x="190" y="300" text-anchor="middle" font-weight="bold" fill="#7a2222">SWITCH OFF ((1−D)·T): current path 2→2'</text>
+<g stroke="#333" stroke-width="1.6" fill="none">
+<path d="M70 320 L70 336 L120 336"/>
+<path d="M160 336 L300 336" />
+<path d="M120 326 L120 348" stroke-dasharray="4 3"/>
+<text x="140" y="322" text-anchor="middle" font-size="9" fill="#a33">Q1 OFF</text>
+<path d="M300 352 L300 366 L480 366 L480 250"/>
+<path d="M300 320 L300 250"/>
+</g>
+<!-- diode -->
+<g transform="translate(0,0)">
+<line x1="120" y1="336" x2="152" y2="336" stroke="#333" stroke-width="1.6"/>
+<path d="M152 326 L182 346 L152 366 Z" fill="#fdecea" stroke="#a33" stroke-width="1.6"/>
+<line x1="182" y1="326" x2="182" y2="366" stroke="#a33" stroke-width="2"/>
+<line x1="182" y1="336" x2="300" y2="336" stroke="#333" stroke-width="1.6"/>
+<text x="167" y="322" text-anchor="middle" font-size="9" fill="#a33">D (catch diode)</text>
+</g>
+<!-- inductor 2 -->
+<path d="M300 250 q10 12 0 20 q-10 8 0 20 q10 12 0 20 q-10 8 0 20" stroke="#0b3d6d" stroke-width="2.5" fill="none"/>
+<text x="240" y="285" font-size="9" fill="#0b3d6d">L keeps current flowing</text>
+<text x="540" y="230" font-size="8.6" fill="#555">in OFF time: inductor resists current change,</text>
+<text x="540" y="242" font-size="8.6" fill="#555">acts as a source; freewheels through D;</text>
+<text x="540" y="254" font-size="8.6" fill="#555">current ramps DOWN, releasing stored energy.</text>
+<text x="540" y="280" font-size="9" font-weight="bold" fill="#0b3d6d">Average result:</text>
+<text x="540" y="294" font-size="9.5">Vout = D · Vin (ideal, CCM)</text>
+<text x="540" y="308" font-size="9" fill="#555">PWM duty D = t_on / T_s</text>
+</g>
+<text x="380" y="376" text-anchor="middle" font-size="8.8" fill="#666" font-style="italic">In a synchronous buck, D is replaced by a second MOSFET (lower loss). Based on the standard two-state CCM analysis <span class="cite">[TI SLVA057 — R3]</span>.</text>
+</svg>
+</div>
+<div class="figcap">Figure 7. Buck converter ON and OFF current paths with labelled components: Q1 (switch), D (catch/freewheel diode), L, C, load.</div>
+
+<h3>7.3 Operation cycle and component behaviour</h3>
+<ul>
+  <li><b>ON phase</b> (Q1 closed): the inductor sees (V<sub>in</sub> − V<sub>out</sub>); current ramps up linearly (dI/dt = (V<sub>in</sub>−V<sub>out</sub>)/L); energy is stored in the magnetic field; the capacitor supplies/absorbs ripple current so the load voltage stays nearly constant.</li>
+  <li><b>OFF phase</b> (Q1 open): the inductor <i>opposes the change</i>, its voltage flips polarity to keep current flowing, and the catch diode (or synchronous MOSFET) carries the freewheeling current; the inductor releases energy into the load while current ramps down.</li>
+  <li><b>Steady state (CCM)</b>: the inductor's volt-second balance — V<sub>in</sub>·t<sub>on</sub> = V<sub>out</sub>·t<sub>off</sub> — gives the ideal conversion ratio <b>V<sub>out</sub> = D·V<sub>in</sub></b>, i.e. <b>D = V<sub>out</sub>/V<sub>in</sub></b> <span class="cite">[TI SLVA057 — R3]</span>.</li>
+</ul>
+
+<h3>7.4 Worked example (with stated assumptions)</h3>
+<div class="eq">
+<b>Assumptions:</b> ideal components (no V<sub>DS</sub> drop, no diode drop), continuous conduction mode, steady state.<br>
+V<sub>in</sub> = 400 V, target V<sub>out</sub> = 200 V, f<sub>sw</sub> = 100 kHz, L = 200 µH, R<sub>load</sub> = 4 Ω.<br><br>
+1) Duty cycle: D = V<sub>out</sub>/V<sub>in</sub> = 200/400 = <b>0.5</b><br>
+2) Output current: I<sub>o</sub> = V<sub>out</sub>/R = 200/4 = 50 A; output power P<sub>o</sub> = 200 × 50 = <b>10 kW</b><br>
+3) On-time: t<sub>on</sub> = D/f<sub>sw</sub> = 0.5 × 10 µs = <b>5 µs</b><br>
+4) Inductor ripple: ΔI<sub>L</sub> = (V<sub>in</sub> − V<sub>out</sub>)·D /(L·f<sub>sw</sub>) = (200 V × 0.5)/(200 µH × 100 kHz) = 100/20 = <b>5 A peak-to-peak</b><br>
+5) Peak inductor current: I<sub>L,pk</sub> = I<sub>o</sub> + ΔI<sub>L</sub>/2 = 50 + 2.5 = <b>52.5 A</b>
+</div>
+<p><b>Output voltage ripple (illustrative, ideal CCM)</b>: for a pure capacitance model, ΔV<sub>out</sub> ≈ ΔI<sub>L</sub> /(8·f<sub>sw</sub>·C<sub>out</sub>). With ΔI<sub>L</sub> = 5 A, f<sub>sw</sub> = 100 kHz, C<sub>out</sub> = 2 mF → ΔV<sub>out</sub> ≈ 5/(8×10⁵×2×10⁻³) ≈ <b>3.1 mV</b> (real designs add ESR effects; this is the textbook ideal term).</p>
+
+<h3>7.5 Feedback control and the embedded role</h3>
+<p>A controller measures V<sub>out</sub> (and usually I<sub>L</sub>), compares it with the reference, and a compensator (PI/PID or type-II/III) adjusts the PWM duty D. In an MCU-based design: ADC samples the feedback → control law computed → compare/timer registers updated → PWM peripheral outputs → gate driver amplifies/isolates → power switch. The gate driver is essential because MCU pins (≈3.3 V, mA) cannot charge the large gate capacitance of power MOSFETs (needs amps at 10–15 V<sub>GS</sub>, isolated when the switch sits on a high-voltage node) <span class="cite">[TI SLUA618 — R12]</span>.</p>
+
+<h3>7.6 Losses, efficiency, thermal and protection</h3>
+<ul>
+  <li><b>Conduction loss</b>: I²R — R<sub>DS(on)</sub> of the MOSFET, DCR of the inductor, ESR of capacitors.</li>
+  <li><b>Switching loss</b>: voltage-current overlap during each transition, ≈ ½·V·I·(t<sub>r</sub>+t<sub>f</sub>)·f<sub>sw</sub>; rises with frequency (why SiC helps: faster, lower-overlap switching at HV).</li>
+  <li><b>Other</b>: gate-charge loss, diode reverse recovery (non-synchronous), core (hysteresis + eddy) loss in L.</li>
+  <li><b>Thermal</b>: losses → junction temperature; heat-spreading and cooling design required; thermistors on hot spots.</li>
+  <li><b>Protection</b>: over-current (cycle-by-cycle current limit, desat/hiccup), over/under-voltage, thermal shutdown, soft-start to limit inrush.</li>
+</ul>
+
+<h3>7.7 Where buck fits in EV charging</h3>
+<p>Real DC fast chargers usually regulate the <i>battery-side</i> output with an isolated stage (LLC, DAB, phase-shifted full bridge) rather than a literal non-isolated buck. But: (a) the <i>control principle</i> (PWM duty + inductor + feedback loop) is identical, and interviewers use buck/boost as the litmus test; (b) the charger's DC-link is created by a <b>PFC boost</b> stage (§8); (c) auxiliary power supplies inside the charger are small bucks; (d) some non-isolated or modular topologies (e.g. buck-derived stages, active-clamp buck) appear in specific designs. <i>(Architecture-dependent.)</i></p>
+</div>
+
+<!-- ============ SECTION 8 ============ -->
+<div class="page pb">
+<h1>8. Boost Converter: Full Technical Explanation</h1>
+
+<h3>8.1 What it is</h3>
+<p>A <b>boost (step-up) converter</b> produces an output voltage <i>higher</i> than its input, by using the inductor's "kick-back": when the switch opens, the inductor voltage flips and <i>adds</i> to the input voltage, charging the output capacitor above V<sub>in</sub>. <span class="kannada">ಬೂಸ್ಟ್ ಕನ್ವರ್ಟರ್ ಕಡಿಮೆ ವೋಲ್ಟೇಜನ್ನು ಹೆಚ್ಚಿನ ವೋಲ್ಟೇಜಾಗಿ ಪರಿವರ್ತಿಸುತ್ತದೆ — ಇಂಡಕ್ಟರ್ ಸಂಗ್ರಹಿಸಿದ ಶಕ್ತಿಯನ್ನು ಬಿಡುಗಡೆ ಮಾಡಿ.</span></p>
+
+<h3>8.2 Circuit and current paths</h3>
+<div class="svgwrap">
+<svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+<defs><marker id="a8" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0b3d6d"/></marker></defs>
+<text x="380" y="18" text-anchor="middle" font-size="14" font-weight="bold" fill="#0b3d6d">Figure 8 — Boost converter: circuit and ON/OFF current paths</text>
+<!-- ON path -->
+<text x="180" y="44" text-anchor="middle" font-weight="bold" fill="#1e5b23">SWITCH ON: inductor charges from Vin</text>
+<g stroke="#333" stroke-width="1.6" fill="none">
+<path d="M50 70 L50 60"/>
+<path d="M50 60 L110 60 L110 100" /><text x="62" y="44" font-size="10" font-weight="bold">Vin</text>
+<path d="M110 130 L110 170 L200 170" />
+<path d="M200 170 L240 170"/>
+<path d="M240 170 L240 240 L130 240 L130 210"/>
+<path d="M50 100 L50 240 L130 240"/>
+</g>
+<path d="M110 100 q10 12 0 20 q-10 8 0 20 q10 12 0 20 q-10 8 0 20" stroke="#0b3d6d" stroke-width="2.5" fill="none"/>
+<text x="132" y="120" font-size="9.5" fill="#0b3d6d">L</text>
+<rect x="200" y="158" width="40" height="24" fill="#dff3e0" stroke="#2e7d32" stroke-width="2"/>
+<text x="220" y="152" text-anchor="middle" font-size="9" fill="#1e5b23">Q (ON)</text>
+<path d="M240 190 L240 240" stroke="#333" stroke-width="1.6"/>
+<path d="M90 90 L90 220" stroke="#1e5b23" stroke-width="2.2" marker-end="url(#a8)"/>
+<text x="78" y="160" text-anchor="end" font-size="9" fill="#1e5b23" font-weight="bold">i_L rises</text>
+<text x="330" y="90" font-size="8.6" fill="#555">Loop: Vin → L → Q → ground.</text>
+<text x="330" y="103" font-size="8.6" fill="#555">Inductor stores E = ½·L·I². Output cap alone</text>
+<text x="330" y="116" font-size="8.6" fill="#555">supplies the load during this phase.</text>
+<text x="330" y="129" font-size="8.6" fill="#555">Diode D blocks the cap from discharging into Q.</text>
+<!-- OFF path -->
+<text x="180" y="270" text-anchor="middle" font-weight="bold" fill="#7a2222">SWITCH OFF: inductor kicks back, Vout = Vin + V_L</text>
+<g stroke="#333" stroke-width="1.6" fill="none">
+<path d="M50 300 L50 290 L110 290 L110 330"/>
+<path d="M110 360 L110 348 L360 348 L360 300"/>
+<path d="M110 330 q10 12 0 20 q-10 8 0 20"/>
+<path d="M200 300 L240 300"/>
+<path d="M50 340 L50 348 L140 348" />
+<path d="M240 300 L420 300 L420 340"/>
+<path d="M420 300 L480 300 L480 340"/>
+<path d="M480 300 L560 300"/>
+</g>
+<rect x="200" y="290" width="0" height="0"/>
+<text x="220" y="284" text-anchor="middle" font-size="9" fill="#a33">Q OFF</text>
+<g transform="translate(0,0)">
+<line x1="240" y1="300" x2="262" y2="300" stroke="#333" stroke-width="1.6"/>
+<path d="M262 291 L284 309 L262 327 Z" fill="#fdecea" stroke="#a33" stroke-width="1.6"/>
+<line x1="284" y1="291" x2="284" y2="327" stroke="#a33" stroke-width="2"/>
+<line x1="284" y1="300" x2="360" y2="300" stroke="#333" stroke-width="1.6"/>
+<text x="273" y="286" text-anchor="middle" font-size="9" fill="#a33">D</text>
+</g>
+<line x1="420" y1="348" x2="420" y2="300" stroke="#333" stroke-width="1.6"/>
+<line x1="404" y1="310" x2="404" y2="338" stroke="#333" stroke-width="3"/><line x1="436" y1="310" x2="436" y2="338" stroke="#333" stroke-width="3"/>
+<text x="420" y="356" text-anchor="middle" font-size="9">C</text>
+<text x="360" y="352" text-anchor="middle" font-size="8" fill="#555">load</text>
+<text x="560" y="200" font-size="8.6" fill="#555">OFF phase: inductor voltage flips,</text>
+<text x="560" y="213" font-size="8.6" fill="#555">current forced through D into cap+load.</text>
+<text x="560" y="226" font-size="8.6" fill="#555">Volt-second balance (CCM):</text>
+<text x="560" y="244" font-size="10" font-weight="bold" fill="#0b3d6d">Vout = Vin / (1 − D)</text>
+<text x="560" y="262" font-size="9" fill="#555">D→1 makes Vout explode (limited by losses,</text>
+<text x="560" y="274" font-size="9" fill="#555">parasitics, duty-cycle max of the design).</text>
+<text x="380" y="356" text-anchor="start" font-size="8.6" fill="#666" font-style="italic">Energy moves every cycle: ON stores in L; OFF transfers L's energy to C/load through D.</text>
+</svg>
+</div>
+<div class="figcap">Figure 8. Boost converter ON/OFF paths: inductor charging, then inductor + input series into the output through the diode.</div>
+
+<h3>8.3 Operation</h3>
+<ul>
+  <li><b>ON</b>: current builds in L from V<sub>in</sub>; load is fed by C; D blocks back-discharge.</li>
+  <li><b>OFF</b>: L's current cannot stop instantly; L's voltage reverses to keep current flowing, so node after L jumps to V<sub>out</sub>; current flows V<sub>in</sub> → L → D → C/load. Energy per cycle from L is dumped into the output.</li>
+  <li><b>Volt-second balance</b> (inductor average voltage = 0 in steady state): V<sub>in</sub>·D·T = (V<sub>out</sub> − V<sub>in</sub>)·(1−D)·T → <b>V<sub>out</sub> = V<sub>in</sub>/(1−D)</b> (ideal CCM) <span class="cite">[ST AN6378 PFC-boost context — R15; standard theory]</span>.</li>
+</ul>
+
+<h3>8.4 Worked example (with assumptions)</h3>
+<div class="eq">
+<b>Assumptions:</b> ideal, CCM.<br>
+V<sub>in</sub> = 230 V AC rectified → treat DC bus target 400 V from a 230 V DC input (grid-side PFC scenario).<br>
+1) D = 1 − V<sub>in</sub>/V<sub>out</sub> = 1 − 230/400 = <b>0.425</b><br>
+2) If P<sub>out</sub> = 4 kW at V<sub>out</sub> = 400 V → I<sub>o</sub> = 10 A; input (inductor) average current I<sub>L</sub> = P/(V<sub>in</sub>×η), η≈1 ideal → 4000/230 ≈ <b>17.4 A</b><br>
+3) With f<sub>sw</sub> = 50 kHz, L = 500 µH: ΔI<sub>L</sub> = V<sub>in</sub>·D/(L·f<sub>sw</sub>) = 230×0.425/(500 µ×50 k) = 97.75/25 ≈ <b>3.9 A p-p</b><br>
+4) Peak switch current = I<sub>L</sub> + ΔI<sub>L</sub>/2 ≈ 17.4 + 1.95 ≈ <b>19.4 A</b> (sizes the MOSFET and D).
+</div>
+
+<h3>8.5 Feedback, sensing, limitations, protection</h3>
+<ul>
+  <li><b>Feedback</b>: measure V<sub>out</sub> (and often inductor/input current for current-mode control); adjust duty D. Note boost is non-minimum-phase (duty ↑ immediately reduces the average current into the output before V<sub>out</sub> rises) — control design is subtler than buck.</li>
+  <li><b>Limitations</b>: practical duty ceilings (~0.7–0.9 for simple boosts) due to losses; diode reverse-recovery; high peak currents; poor transient handling at light load (DCM); right-half-plane-zero dynamics.</li>
+  <li><b>Protection</b>: switch over-current, output over-voltage (the cap can rise quickly if load disconnects — OVP is critical), inrush/soft-start, thermal.</li>
+  <li><b>Relevance to EV chargers</b>: the PFC front end of nearly every DC fast charger is a <b>boost-type rectifier</b> (single-phase boost PFC, or 3-phase variants such as the Vienna rectifier — a boost-derived topology) that shapes grid current and creates the ~800 V DC link <i>(topology-dependent)</i>. Boost concepts also appear in bidirectional stages (battery→grid direction), in on-board charger PFCs, and in auxiliary supplies.</li>
+</ul>
+</div>
+
+<!-- ============ SECTION 9 ============ -->
+<div class="page pb">
+<h1>9. Buck vs Boost vs Buck-Boost</h1>
+
+<h3>9.1 Comparison table</h3>
+<table>
+<tr><th style="width:16%;">Criterion</th><th>Buck</th><th>Boost</th><th>Buck-Boost (inverting or 4-switch)</th></tr>
+<tr><td><b>Voltage behaviour</b></td><td>V<sub>out</sub> &lt; V<sub>in</sub> (step-down)</td><td>V<sub>out</sub> &gt; V<sub>in</sub> (step-up)</td><td>V<sub>out</sub> above, below (4-switch) or inverted magnitude of V<sub>in</sub></td></tr>
+<tr><td><b>Core components</b></td><td>Series switch, catch diode / sync FET, inductor, output cap</td><td>Shunt switch at input side, series diode to output, inductor, output cap</td><td>Two switches + diodes (4-switch version), inductor; inverted polarity (classic) or same polarity (4-switch)</td></tr>
+<tr><td><b>Duty relation (ideal CCM)</b></td><td>V<sub>out</sub> = D·V<sub>in</sub></td><td>V<sub>out</sub> = V<sub>in</sub>/(1−D)</td><td>|V<sub>out</sub>| = V<sub>in</sub>·D/(1−D)</td></tr>
+<tr><td><b>Efficiency notes</b></td><td>Direct energy path in ON phase; among the best simple topologies; sync rectification removes diode loss</td><td>All output energy passes through the diode/switch path; higher peak currents; reverse recovery matters</td><td>Two conversions per cycle (buck+boost cascade in 4-switch version) → more loss stages; extra switches</td></tr>
+<tr><td><b>Typical use cases</b></td><td>Point-of-load rails, 48→12 V, aux supplies, battery discharging to lower bus</td><td>PFC pre-regulators, battery→HV bus raise, LED drivers, PV micro-inverters</td><td>Battery-powered devices needing a rail that can sit above or below the battery; USB-PD power roles</td></tr>
+<tr><td><b>Advantages</b></td><td>Simple, efficient, cheap, excellent transient response</td><td>Simple, can generate HV from LV; natural PFC stage</td><td>Full range flexibility around V<sub>in</sub></td></tr>
+<tr><td><b>Limitations</b></td><td>Cannot exceed V<sub>in</sub>; input current pulsed (needs input filter)</td><td>Cannot go below V<sub>in</sub>−(diode); OVP risk if load disconnects; control trickier (RHP zero)</td><td>More parts, lower efficiency, both switches see high current</td></tr>
+</table>
+
+<h3>9.2 Buck vs boost waveforms</h3>
+<div class="svgwrap">
+<svg viewBox="0 0 760 330" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+<text x="380" y="16" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#0b3d6d">Figure 9 — Buck vs boost: gate signal and inductor current in CCM (same duty D = 0.5, ideal)</text>
+<!-- buck -->
+<text x="60" y="42" font-size="10.5" font-weight="bold" fill="#0b3d6d">BUCK</text>
+<g stroke="#999" stroke-dasharray="3 3"><line x1="60" y1="60" x2="380" y2="60"/><line x1="60" y1="150" x2="380" y2="150"/></g>
+<g stroke="#333" stroke-width="1.6" fill="none">
+<path d="M60 100 L100 100 L100 60 L180 60 L180 100 L260 100 L260 60 L340 60 L340 100 L380 100"/>
+</g>
+<text x="388" y="64" font-size="8.5">gate ON</text><text x="388" y="104" font-size="8.5">gate OFF</text>
+<line x1="60" y1="196" x2="380" y2="196" stroke="#999" stroke-dasharray="3 3"/>
+<text x="388" y="200" font-size="8.5">avg I_L</text>
+<g stroke="#0b3d6d" stroke-width="2" fill="none">
+<path d="M60 186 L100 156 L180 186 L260 156 L340 186 L380 171"/>
+</g>
+<text x="220" y="222" font-size="8.6" fill="#555">I_L triangle around output current; Vout = D·Vin (here ½·Vin)</text>
+<!-- boost -->
+<text x="470" y="42" font-size="10.5" font-weight="bold" fill="#7a3aa0">BOOST</text>
+<g stroke="#333" stroke-width="1.6" fill="none">
+<path d="M470 100 L510 100 L510 60 L590 60 L590 100 L670 100 L670 60 L750 60 L750 100"/>
+</g>
+<line x1="470" y1="196" x2="750" y2="196" stroke="#999" stroke-dasharray="3 3"/>
+<text x="758" y="200" font-size="8.5">avg I_L</text>
+<g stroke="#7a3aa0" stroke-width="2" fill="none">
+<path d="M470 170 L510 140 L590 170 L670 140 L750 170"/>
+</g>
+<text x="610" y="222" font-size="8.6" fill="#555">I_L triangle around input current; Vout = Vin/(1−D)</text>
+<text x="60" y="258" font-size="9.5" fill="#223">Key waveform differences: in buck, the switch is in <tspan font-weight="bold">series</tspan> with the input → input current is chopped, output sees smooth L-C filtered current.</text>
+<text x="60" y="274" font-size="9.5" fill="#223">In boost, the inductor sits <tspan font-weight="bold">in front</tspan> → input current is naturally continuous (great for PFC), but the switch current equals the inductor current and the</text>
+<text x="60" y="290" font-size="9.5" fill="#223">diode current is pulsed into the output. Output ripple is larger; the output capacitor carries the load during the ON phase.</text>
+<text x="60" y="314" font-size="8.6" fill="#666" font-style="italic">Sketches are idealized CCM shapes for concept illustration, not simulation output.</text>
+</svg>
+</div>
+<div class="figcap">Figure 9. Comparison of switching behaviour and inductor-current shapes.</div>
+
+<h3>9.3 Real DC fast chargers: beyond simple buck/boost</h3>
+<ul>
+  <li><b>Isolation</b>: DC charging practice requires galvanic isolation between grid and vehicle — a plain buck/boost has no isolation, so real chargers use transformers (LLC, DAB, PSFB) or modular isolated stages. <i>Standard practice; the isolation requirement details live in IEC 61851-23 — verify edition.</i></li>
+  <li><b>Bidirectionality</b>: V2G-capable chargers need power flow in both directions → topologies that reverse flow (DAB, bidirectional LLC/boost-derived) and control software for discharge sessions (ISO 15118-20 BPT).</li>
+  <li><b>Modularity/interleaving</b>: parallel modules share current (interleaved phases cut ripple), letting one cabinet scale from 50 kW to 500 kW+; power blocks can be switched on/off for efficiency at part load.</li>
+  <li><b>Why topology depends on requirements</b>: wide output voltage range (150–1000 V) needs topologies with wide gain or module reconfiguration (series/parallel stacking); isolation and safety rules; efficiency targets (SiC vs IGBT); EMC; cooling; and cost. A single "buck or boost" circuit cannot meet all of these — that's the mature answer to give in an interview.</li>
+</ul>
+</div>
+
+<!-- ============ SECTION 10 ============ -->
+<div class="page pb">
+<h1>10. Control System and Embedded Firmware</h1>
+
+<h3>10.1 Closed-loop control view</h3>
+<div class="svgwrap">
+<svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+<defs><marker id="a10" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#0b3d6d"/></marker></defs>
+<text x="380" y="18" text-anchor="middle" font-size="14" font-weight="bold" fill="#0b3d6d">Figure 10 — MCU/ADC/PWM/sensor feedback-control loop in a charger</text>
+<g stroke="#0b3d6d" stroke-width="1.3" fill="none">
+<rect x="30" y="60" width="110" height="56" rx="5" fill="#eef3f9"/>
+<rect x="180" y="60" width="110" height="56" rx="5" fill="#fff"/>
+<rect x="330" y="60" width="120" height="56" rx="5" fill="#fff"/>
+<rect x="490" y="60" width="120" height="56" rx="5" fill="#fdecea" stroke="#a33"/>
+<rect x="180" y="170" width="110" height="50" rx="5" fill="#eef7ee" stroke="#2e7d32"/>
+<rect x="330" y="170" width="120" height="50" rx="5" fill="#eef7ee" stroke="#2e7d32"/>
+</g>
+<g font-size="9.2" text-anchor="middle" fill="#1a1f2e">
+<text x="85" y="84" font-weight="bold">Setpoint</text><text x="85" y="97" font-size="8">(V, I request</text><text x="85" y="107" font-size="8">from session)</text>
+<text x="235" y="82" font-weight="bold">MCU</text><text x="235" y="94" font-size="8">error = sp − fb;</text><text x="235" y="104" font-size="8">PI control law;</text><text x="235" y="114" font-size="8">state machine +</text><text x="235" y="112" font-size="0.1"> </text><text x="235" y="113" font-size="0.1"> </text><text x="235" y="115" font-size="8">protection limits</text>
+<text x="390" y="84" font-weight="bold">PWM peripheral</text><text x="390" y="96" font-size="8">duty/frequency update,</text><text x="390" y="107" font-size="8">dead-time insertion</text>
+<text x="550" y="84" font-weight="bold">Gate driver + power stage</text><text x="550" y="97" font-size="8">isolated gate pulses →</text><text x="550" y="108" font-size="8">DC/DC + PFC switches</text>
+<text x="235" y="191" font-weight="bold" fill="#1e5b23">Sensors</text><text x="235" y="203" font-size="8">V, I, T; isolated,</text><text x="235" y="213" font-size="8">filtered</text>
+<text x="390" y="191" font-weight="bold" fill="#1e5b23">ADC</text><text x="390" y="203" font-size="8">synchronized sampling,</text><text x="390" y="213" font-size="8">averaging, plausibility</text>
+</g>
+<g stroke="#0b3d6d" stroke-width="1.8" fill="none">
+<line x1="140" y1="88" x2="178" y2="88" marker-end="url(#a10)"/>
+<line x1="290" y1="88" x2="328" y2="88" marker-end="url(#a10)"/>
+<line x1="450" y1="88" x2="488" y2="88" marker-end="url(#a10)"/>
+<path d="M610 88 L660 88 L660 195 L452 195" marker-end="url(#a10)"/>
+<path d="M330 195 L292 195" marker-end="url(#a10)"/>
+<path d="M180 195 L85 195 L85 118" marker-end="url(#a10)"/>
+</g>
+<text x="672" y="145" font-size="8.5" fill="#555" transform="rotate(90 672 145)">energy out / plant (power path)</text>
+<text x="255" y="165" font-size="8.3" fill="#2e7d32">feedback path (fast loop ~ switching period; slow loop ~ ms)</text>
+<text x="380" y="252" text-anchor="middle" font-size="9" fill="#666" font-style="italic">Fast inner current loop (per switching cycle) + slower outer voltage/power loop + supervisory protection (per message loop). Rates are design choices, product-dependent.</text>
+</svg>
+</div>
+<div class="figcap">Figure 10. Feedback-control structure from setpoint to power stage and back through sensing/ADC.</div>
+
+<h3>10.2 Firmware building blocks</h3>
+<ul>
+  <li><b>MCU architecture &amp; peripherals</b>: 32-bit MCU families with fast ADCs (with simultaneous multi-channel sampling), high-resolution PWM timers (with dead-time), CAN/UART/SPI/I2C for sensors and boards, Ethernet for backend/PLC boards. Multiple MCUs often split: one for safety/power loops, one for comms/session, one for HMI.</li>
+  <li><b>ADC sampling</b>: synchronized to PWM (sample at counter underflow/zero-vec) to avoid switching noise; oversampling and median filters; per-channel plausibility checks (range, rate-of-change, cross-sensor consistency).</li>
+  <li><b>PWM generation</b>: duty from control law; dead-time insertion so high/low switches never conduct together; phase-shift for interleaved/bridge legs; min/max duty clamps.</li>
+  <li><b>Gate-driver control</b>: enable/interlock lines, desat fault handling (immediate hardware trip + logged latch-up), brown-out behaviour (drivers must default off).</li>
+  <li><b>Feedback loops</b>: inner current loop, outer voltage loop, power-limit loop (grid connection limits), thermal derating loop (module temperature → current ceiling).</li>
+  <li><b>State machine</b>: session lifecycle states as in Figure 6, with timeout guards on every transition.</li>
+  <li><b>Communication stack</b>: CP/PWM handling, SECC/PLC session handling (often on a dedicated SoC), OCPP client, internal CAN between control boards.</li>
+  <li><b>Fault monitoring &amp; protection</b>: hardware comparators for cycle-level trips + software supervision with severity classes (log-and-derate vs safe-stop vs latch-out requiring service).</li>
+  <li><b>Watchdog &amp; diagnostics</b>: independent watchdog + window watchdog; self-tests (RAM/flash/CRC of code, sensor tests) at boot and periodically; persistent event log in non-volatile memory with timestamps.</li>
+  <li><b>RTOS vs bare-metal</b>: bare-metal superloop with interrupt-driven control possible for simple units; RTOS (or at minimum prioritized ISRs + cooperative tasks) when many independent timers/stacks coexist. The safety-critical loops should never depend on non-real-time tasks (display, networking).</li>
+  <li><b>Event logging &amp; debugging</b>: structured event/error codes, black-box session traces (V/I envelope, faults), SWD/JTAG in development, and remote log retrieval via backend.</li>
+  <li><b>Calibration &amp; testing</b>: sensor offset/gain calibration stored per unit; HIL (§11.5) and bench tests with programmable loads/sources; type tests per regional regulation.</li>
+</ul>
+
+<h3>10.3 Conceptual firmware flowchart + educational pseudocode</h3>
+<pre>
+/* EDUCATIONAL PSEUDOCODE — illustrates structure, NOT production-ready safety firmware.
+   A real charger controller requires certified functional-safety design, redundancy,
+   hardware interlocks and conformance testing beyond this sketch. */
+
+const uint32_t LOOP_1MS = 1000u;   /* fast control tick */
+static SessionState g_state = ST_IDLE;
+
+void main(void)
+{
+    hw_init();          /* clocks, GPIO, ADC, PWM (outputs disabled), CAN, watchdog */
+    self_test();        /* RAM/flash CRC, sensor sanity; fail → ST_FAULT_SERVICE */
+    rtos_or_scheduler_start();
+}
+
+/* ---- 1 ms control ISR: sensing + loops + protection (always highest priority) ---- */
+void ISR_control_1ms(void)
+{
+    SensorSet s = adc_read_all();            /* V_out, I_out, T_modules, V_dclink ... */
+    if (!plausible(s)) { fault(RAW_SENSOR_IMPLAUSIBLE); }
+
+    if (hw_trip_active()) { enter_safe_state(); }        /* gate-driver desat, E-stop, HW OCP */
+
+    switch (g_state)
+    {
+      case ST_IDLE:      keep_output_off(); break;
+
+      case ST_CABLECHK:  if (!imd_test_running()) start_imd_test();
+                         if (imd_result_ok())       g_state = ST_PRECHARGE;
+                         else if (timeout())         fault(INSULATION_FAIL);
+                         break;
+
+      case ST_PRECHARGE: ramp_output_voltage(ev_request.voltage, ev_request.i_limit);
+                         if (abs(v_out - ev_request.voltage) &lt; MATCH_EPS &amp;&amp; settled())
+                             g_state = ST_ENERGIZED;           /* ready for contactor close */
+                         else if (timeout())          fault(PRECHARGE_TIMEOUT);
+                         break;
+
+      case ST_CHARGING:  v_ref = clamp(ev_request.voltage, 0, MY_VMAX);
+                         i_ref = clamp(ev_request.current,  0, min(MY_IMAX, thermal_limit()));
+                         pi_loop_run(&amp;i_loop, i_ref, s.i_out);   /* inner loop */
+                         pi_loop_run(&amp;v_loop, v_ref, s.v_out);   /* outer loop */
+                         break;
+
+      case ST_RAMPDOWN:  ramp_current_to_zero();
+                         if (i_out &lt; ZERO_EPS) { open_contactors(); g_state = ST_WELDCHK; }
+                         break;
+
+      case ST_FAULT:     enter_safe_state();        /* PWM off, contactors open, bleed on */
+                         break;
+      default: break;
+    }
+    comm_timeout_check();   /* CP state, PLC session, internal CAN heartbeats */
+    watchdog_kick();
+}
+
+/* ---- message-task: V2G session (runs on SECC-side; requests forwarded to 1 ms task) ---- */
+void on_current_demand(const CurrentDemandReq *r)
+{
+    if (state_ok_to_accept()) { ev_request = *r; }        /* clamped later in control ISR */
+    else { respond(EVSE_NOT_READY); }
+}
+void on_power_delivery_stop(void)   { g_state = ST_RAMPDOWN; }
+void on_comm_timeout(void)          { fault(COMM_LOSS); }   /* → safe state per standard */
+</pre>
+<div class="note"><b>Say this in the interview:</b> the separation of a hard-real-time 1 ms control/protection task from a softer message/session task is the core embedded-architecture insight of a charger controller. Also emphasise that CP state handling has <i>hardware-level</i> responses (comparators, contactor driver enable lines) that work even if software hangs.</div>
+</div>
+
+<!-- ============ SECTION 11 ============ -->
+<div class="page pb">
+<h1>11. MATLAB/Simulink and Testing</h1>
+
+<h3>11.1 Modelling a buck converter</h3>
+<p>MathWorks' own Simscape Electrical "Buck Converter" example models a switching supply converting a 30 V DC input into a regulated 15 V output; you use the model to size L and C and to design the feedback controller, choosing continuous or discrete controllers to study discretisation effects; modelling the switches as MOSFETs (not ideal switches) captures on-resistance and gate-timing effects <span class="cite">[MathWorks Buck Converter example — R16]</span>. Steps for a beginner model:</p>
+<ol>
+  <li>Open Simscape → Electrical → build: DC Voltage Source → MOSFET (or Controlled PWM + Half-Bridge Driver blocks, as the example uses) → series inductor → parallel capacitor + resistive load.</li>
+  <li>Add the catch diode (nonsynchronous) or second MOSFET (synchronous).</li>
+  <li>PWM: use a PWM Generator or compare a sawtooth carrier with your duty signal.</li>
+  <li>Measure: Voltage Sensor and Current Sensor blocks → Simulink scopes/To Workspace.</li>
+  <li>Close the loop: PI controller on (V<sub>ref</sub> − V<sub>out</sub>), output clamped to [0, 1] as duty.</li>
+</ol>
+
+<h3>11.2 Modelling a boost converter</h3>
+<p>Same block palette; topology per Figure 8: source → inductor → switch to ground; diode from switch node to output capacitor+load. Swap the control direction (duty sets step-up). Simscape Electrical also provides ready-made boost/Buck Converter block libraries (the <code>Buck Converter</code> block supports nonsynchronous and synchronous variants) <span class="cite">[MathWorks Buck Converter block ref — R17]</span>.</p>
+
+<h3>11.3 Simulating feedback, duty, load steps, ripple, efficiency</h3>
+<ul>
+  <li><b>Duty sweep</b>: hold load constant, sweep D from 0.1→0.9, plot average V<sub>out</sub> vs D and compare with V<sub>out</sub> = D·V<sub>in</sub> (buck) or V<sub>in</sub>/(1−D) (boost).</li>
+  <li><b>Load step</b>: switch the load resistor (e.g. via an Ideal Switch) at t = 5 ms; observe overshoot/undershoot, settling time; tune PI gains.</li>
+  <li><b>Ripple study</b>: zoom steady-state V<sub>out</sub>; verify ΔI<sub>L</sub> against the formula; increase C or L and re-measure.</li>
+  <li><b>Efficiency</b>: Simscape lets you enable semiconductor losses (V<sub>CE</sub>/R<sub>on</sub>, transition loss models) — the MathWorks thermal-dynamics examples show MOSFET dissipated power averaged over the PWM cycle <span class="cite">[R16]</span>. Efficiency η = P<sub>out</sub>/P<sub>in</sub> from mean values over a long run.</li>
+</ul>
+
+<h3>11.4 Testing communication and state transitions</h3>
+<ul>
+  <li>Model the session as a <b>Stateflow chart</b> (or Simulink charts) mirroring Figure 6; drive it with scripted events (plug-in, SLAC done, CableCheck fail, comm timeout).</li>
+  <li>Write <b>test harnesses</b> that assert: contactors never closed before CableCheck pass; PWM disabled in FAULT within one tick; every state has a timeout path.</li>
+  <li>Use <b>test sequences/assessments</b> (Simulink Test) and coverage to prove all transitions were exercised.</li>
+</ul>
+
+<h3>11.5 HIL at a conceptual level</h3>
+<p>Hardware-in-the-loop means the <i>real controller</i> (your MCU/SECC hardware) runs against a <i>simulated power plant</i>: a real-time simulator emulates the converter, battery and EV behaviour and answers the controller's PWM/sensor I/O in real time. You can then safely test fault scenarios (shorted output, sensor drift, EV that violates its limits) that would destroy hardware on a bench. Companies use HIL to certify protocol conformance (e.g. CharIN test systems) and control software before first power-on. <i>(Conceptual description.)</i></p>
+
+<h3>11.6 Common simulation plots and interpretation</h3>
+<table>
+<tr><th style="width:30%;">Plot</th><th>How to read it</th></tr>
+<tr><td>V<sub>out</sub> vs time (startup)</td><td>Smooth soft-start, no overshoot past OVP; verify soft-start ramp shape.</td></tr>
+<tr><td>I<sub>L</sub> waveform</td><td>Triangle in CCM; valley hits zero → DCM (loss of regulation); slope = V<sub>L</sub>/L.</td></tr>
+<tr><td>V<sub>out</sub> ripple (zoom)</td><td>Peak-to-peak vs design target; spikes reveal ESR or layout issues (in simulation: ESR model).</td></tr>
+<tr><td>Load-step response</td><td>Undershoot depth + settling time; tune PI (too low gain → sluggish; too high → ringing).</td></tr>
+<tr><td>Efficiency vs load</td><td>Hump curve: low at light load (fixed losses dominate), peak at mid load, droops at heavy load (I²R).</td></tr>
+<tr><td>Duty vs time (fault run)</td><td>Saturation at clamp = loop can't reach setpoint → indicates a limit, not a bug.</td></tr>
+</table>
+
+<h3>11.7 Beginner project plan (simulation-first)</h3>
+<ol>
+  <li><b>Day 1 (a.m.)</b>: Build open-loop buck (30 V→15 V per MathWorks example); verify D=0.5 → 15 V; capture ripple.</li>
+  <li><b>Day 1 (p.m.)</b>: Close the loop with PI; apply load steps; tune; log settling time.</li>
+  <li><b>Day 2 (a.m.)</b>: Build boost; verify V<sub>out</sub> = V<sub>in</sub>/(1−D) at three duty values; add OVP scenario (load disconnect).</li>
+  <li><b>Day 2 (p.m.)</b>: Add thermal/loss models; produce efficiency-vs-load curve; interpret hump.</li>
+  <li><b>Day 3</b>: Stateflow charging state machine (Fig. 6); scripted fault injections (CableCheck fail, comm timeout); produce a one-page report with plots — bring it to the interview as evidence of practical skill.</li>
+</ol>
+</div>
+
+<!-- ============ SECTION 12 ============ -->
+<div class="page pb">
+<h1>12. Faults, Protection and Troubleshooting</h1>
+
+<h3>12.1 Fault table</h3>
+<p class="small"><i>Monitoring/response columns describe typical diagnostic practice; exact certified behaviour is defined by the applicable standard edition and the manufacturer's safety design — do not treat this table as a safety spec.</i></p>
+<table style="font-size:8pt;">
+<tr><th style="width:12%;">Fault</th><th style="width:20%;">Symptom</th><th style="width:22%;">Likely causes</th><th style="width:22%;">Monitoring method</th><th style="width:24%;">Typical safe response</th></tr>
+<tr><td><b>Overvoltage</b></td><td>Output V above limits; EV reports over-voltage; EVSEStatusCode fault</td><td>Loop instability, sensor gain error, load dump (EV stops drawing), DC-link runaway</td><td>Redundant V sensing (independent channel), software + hardware OVP comparators</td><td>Fast PWM disable, open contactors, derate/latch depending on severity; log code</td></tr>
+<tr><td><b>Overcurrent</b></td><td>Current above request/rating; blown fuse evidence; hot cable</td><td>EV drawing beyond agreement, control loop error, sensor offset, short</td><td>Shunt/Hall sensors + hardware OCP (desat/comparator) per switch</td><td>Cycle-by-cycle current limit → session stop on repeat; semiconductor fuse / trip</td></tr>
+<tr><td><b>Overtemperature</b></td><td>Module/cable/connector temps high; power derating; fan noise</td><td>Cooling failure, ambient heat, loose busbar, blocked vents</td><td>NTCs/RTDs on modules, connector (CCS pins), coolant; thermal models</td><td>Derate current first; stop session if limits still exceeded</td></tr>
+<tr><td><b>Insulation fault</b></td><td>CableCheck fails; IMD warning/fault; session abort at start or during charge</td><td>Damaged cable, moisture/contamination, EV-side isolation issue, IMD drift</td><td>IMD per IEC 61851-23: pre-charge insulation test + continuous monitoring <span class="cite">[R10]</span></td><td>Do not start / stop session; keep output discharged; report fault code</td></tr>
+<tr><td><b>Contactor failure</b></td><td>Closing command but no feedback; voltage present when open; session won't start/stop</td><td>Welded contacts, coil failure, mechanical jam, driver fault</td><td>Aux contacts + pre/post-close voltage signature; welding detection at session end <span class="cite">[R5]</span></td><td>Prevent energization; if welded: block session until serviced (hard-latch)</td></tr>
+<tr><td><b>Pre-charge timeout</b></td><td>Output V never matches battery V in the pre-charge window</td><td>Battery contactor not closed at EV, output short, DC/DC can't source, wrong request</td><td>Pre-charge timer + ΔV and dV/dt monitoring</td><td>Abort before main contactor close; open everything; log; retry per policy</td></tr>
+<tr><td><b>Communication timeout</b></td><td>PLC session drops; V2G message not answered in performance time</td><td>RFI/noise on CP-PE, EVCC crash, modem firmware bug, loose CP pin</td><td>Sequence timers per V2G standard; CP-state watchdog; link-quality stats</td><td>Controlled stop of power delivery within standard-defined sequence; log</td></tr>
+<tr><td><b>CP/PLC failure</b></td><td>No State B transition; SLAC never matches; PWM missing</td><td>Damaged pilot circuit, diode test fail (State F), injection circuit fault, dirty pins</td><td>CP voltage/PWM continuous monitoring, SLAC attenuation stats</td><td>No session; display user-friendly error; service code with SLAC logs</td></tr>
+<tr><td><b>Sensor failure</b></td><td>Implausible reading (e.g. −40°C, 0 V while HV present, stuck current)</td><td>Broken wire, sensor damage, ADC fault, connector corrosion</td><td>Range/rate plausibility + cross-checks between independent sensors</td><td>Treat as fault, not truth: fail-safe state; use redundant channel if design allows</td></tr>
+<tr><td><b>DC-link abnormality</b></td><td>Bus V out of band; excessive ripple; bleeder not discharging</td><td>Capacitor aging, PFC failure, pre-charge resistor open</td><td>Bus V sensor + ripple/ΔV diagnostics; discharge-time check at shutdown</td><td>Block session; safe discharge; service flag (cap health trend)</td></tr>
+<tr><td><b>Cooling failure</b></td><td>Pump/fan feedback lost; ΔT across loop too small/large; leak detected</td><td>Pump wear, coolant leak, fan bearing, flow sensor failure</td><td>Flow switches, pump tach feedback, leak loops, coolant temp sensors</td><td>Derate or stop based on thermal margin; prevent cable/module overheating</td></tr>
+<tr><td><b>Emergency stop</b></td><td>E-stop pressed; hard safety chain open</td><td>Human action, button/cable fault, interlock open (door)</td><td>Hard-wired safety chain monitored independent of main MCU</td><td>Immediate hardware-level shutdown (fastest path); latch until reset</td></tr>
+</table>
+
+<h3>12.2 Fault-detection flowchart</h3>
+<div class="svgwrap">
+<svg viewBox="0 0 760 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+<defs><marker id="a12" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#0b3d6d"/></marker></defs>
+<text x="380" y="18" text-anchor="middle" font-size="14" font-weight="bold" fill="#0b3d6d">Figure 11 — Charger fault-detection and response flow (conceptual)</text>
+<g font-size="9.3" text-anchor="middle">
+<rect x="300" y="34" width="170" height="34" rx="5" fill="#eef3f9" stroke="#0b3d6d"/><text x="385" y="55" font-weight="bold" fill="#0b3d6d">Read sensors + status</text>
+<polygon points="385,90 540,122 385,154 230,122" fill="#fff8e8" stroke="#b26a00"/><text x="385" y="126" fill="#7a4a00" font-weight="bold">Any fault signal?</text><text x="385" y="138" font-size="8" fill="#7a4a00">(HW trip · SW limit · IMD · comms · contactor)</text>
+<polygon points="385,176 520,204 385,232 250,204" fill="#fff8e8" stroke="#b26a00"/><text x="385" y="208" fill="#7a4a00" font-weight="bold">Severity class?</text>
+<rect x="40" y="260" width="160" height="52" rx="5" fill="#fff4dd" stroke="#b26a00"/><text x="120" y="282" fill="#7a4a00" font-weight="bold">LEVEL 1: derate</text><text x="120" y="295" font-size="8" fill="#7a4a00">thermal margin low,</text><text x="120" y="305" font-size="8" fill="#7a4a00">grid limit — keep charging, reduce I</text>
+<rect x="230" y="260" width="160" height="52" rx="5" fill="#fdecea" stroke="#a33"/><text x="310" y="282" fill="#7a2222" font-weight="bold">LEVEL 2: stop session</text><text x="310" y="295" font-size="8" fill="#7a2222">ramp I→0, open contactors,</text><text x="310" y="305" font-size="8" fill="#7a2222">CP→B, discharge, report to EV</text>
+<rect x="420" y="260" width="160" height="52" rx="5" fill="#fdecea" stroke="#a33"/><text x="500" y="282" fill="#7a2222" font-weight="bold">LEVEL 3: fast trip</text><text x="500" y="295" font-size="8" fill="#7a2222">hardware OCP/desat/E-stop:</text><text x="500" y="305" font-size="8" fill="#7a2222">PWM off immediately (hardware path)</text>
+<rect x="600" y="260" width="140" height="52" rx="5" fill="#eee" stroke="#555"/><text x="670" y="282" fill="#333" font-weight="bold">LEVEL 4: latch</text><text x="670" y="295" font-size="8" fill="#333">service required</text><text x="670" y="305" font-size="8" fill="#333">(welded contactor, IMD fault)</text>
+<rect x="250" y="345" width="270" height="40" rx="5" fill="#eef7ee" stroke="#2e7d32"/><text x="385" y="363" fill="#1e5b23" font-weight="bold">Log event + context (V, I, T, session stage)</text><text x="385" y="376" font-size="8" fill="#1e5b23">→ report via protocol/backend → recovery per policy</text>
+</g>
+<g stroke="#0b3d6d" stroke-width="1.5" fill="none">
+<line x1="385" y1="68" x2="385" y2="88" marker-end="url(#a12)"/>
+<line x1="385" y1="154" x2="385" y2="174" marker-end="url(#a12)"/>
+<line x1="310" y1="222" x2="130" y2="258" marker-end="url(#a12)"/>
+<line x1="360" y1="230" x2="320" y2="258" marker-end="url(#a12)"/>
+<line x1="420" y1="230" x2="480" y2="258" marker-end="url(#a12)"/>
+<line x1="470" y1="212" x2="640" y2="258" marker-end="url(#a12)"/>
+<line x1="120" y1="312" x2="300" y2="352" marker-end="url(#a12)"/>
+<line x1="310" y1="312" x2="350" y2="343" marker-end="url(#a12)"/>
+<line x1="500" y1="312" x2="430" y2="347" marker-end="url(#a12)"/>
+<line x1="670" y1="312" x2="475" y2="356" marker-end="url(#a12)"/>
+</g>
+<text x="60" y="118" font-size="9" fill="#1e5b23" font-weight="bold">No fault</text><line x1="230" y1="122" x2="120" y2="122" stroke="#2e7d32" stroke-width="1.5"/><line x1="120" y1="122" x2="120" y2="122" stroke="#2e7d32" stroke-width="1.5" marker-end="url(#a12)"/>
+<text x="75" y="140" font-size="8.4" fill="#1e5b23">→ continue charging loop,</text><text x="75" y="151" font-size="8.4" fill="#1e5b23">re-check next cycle</text>
+<text x="380" y="405" text-anchor="middle" font-size="8.6" fill="#666" font-style="italic">Conceptual model for learning/diagnostics. Certified designs follow the applicable standard's exact response timings and are validated by type tests.</text>
+</svg>
+</div>
+<div class="figcap">Figure 11. Severity-graded fault response: derate → stop → hardware trip → service latch, always with logging.</div>
+</div>
+
+<!-- ============ SECTION 13 ============ -->
+<div class="page pb">
+<h1>13. Diagram Index and Sources of Visuals</h1>
+<p>All 13 requested visuals are provided as <b>original diagrams</b> created for this report (no copyrighted figures reproduced):</p>
+<table>
+<tr><th style="width:8%;">Requested visual</th><th style="width:30%;">Delivered as</th><th>Notes</th></tr>
+<tr><td>1</td><td>Figure 1 — overall architecture (§2)</td><td>Power/control/comms paths colour-coded</td></tr>
+<tr><td>2</td><td>Figure 13/§3 tables — charger-side hardware</td><td>Component map given as the detailed Table 3.1; block-level view inside Figure 1</td></tr>
+<tr><td>3</td><td>Figure 12 — EV-side block diagram (§4)</td><td>Includes "who owns what" split</td></tr>
+<tr><td>4</td><td>Figure 2 — CCS2 pins (§5.1)</td><td>Schematic front view; functions labelled</td></tr>
+<tr><td>5</td><td>Figure 5 — communication sequence diagram (§5.8)</td><td>16 numbered steps, both participants</td></tr>
+<tr><td>6</td><td>Figure 3 — CP/PWM concept (§5.3)</td><td>States + duty-cycle waveform</td></tr>
+<tr><td>7</td><td>Figure 4 — PLC/SLAC/protocol stack (§5.6)</td><td>Layered EV↔charger stack</td></tr>
+<tr><td>8</td><td>Figure 6 — charging state machine (§6)</td><td>With fault transitions</td></tr>
+<tr><td>9</td><td>Figure 7 — buck circuit + ON/OFF paths (§7)</td><td>Both switching phases labelled</td></tr>
+<tr><td>10</td><td>Figure 8 — boost circuit + ON/OFF paths (§8)</td><td>Energy storage/release annotated</td></tr>
+<tr><td>11</td><td>Figure 9 — buck vs boost waveforms (§9)</td><td>Gate + inductor current, CCM shapes</td></tr>
+<tr><td>12</td><td>Figure 10 — MCU/ADC/PWM feedback loop (§10)</td><td>Fast/slow loop structure</td></tr>
+<tr><td>13</td><td>Figure 11 — fault-detection flowchart (§12)</td><td>Severity-graded response model</td></tr>
+</table>
+<div class="note">External figures are not embedded (copyright). Where a standard sequence figure exists publicly (e.g. the ISO 15118-2 DC message-sequence figure in the Typhoon HIL documentation <span class="cite">[R5]</span>), it is cited as a reading reference instead, and our own original version is used in this report.</div>
+</div>
+
+<!-- ============ SECTION 14 ============ -->
+<div class="page pb">
+<h1>14. Interview Preparation — 30 Q&amp;A</h1>
+<p>Levels: <span class="lvl">B</span> = beginner, <span class="lvl">I</span> = intermediate, <span class="lvl">S</span> = scenario.</p>
+
+<div class="qa"><span class="q">1. How do an EV and a DC charger communicate? <span class="lvl">B</span></span>
+<p class="a">Two layers: (1) the IEC 61851-1 control pilot — a 1 kHz ±12 V PWM on the CP pin whose voltage levels (states A–F) tell each side whether the vehicle is present, ready and charging; (2) a digital session over power-line communication (HomePlug Green PHY on CP–PE) in which EVCC and SECC exchange DIN 70121/ISO 15118 messages: protocol version agreement, session setup, authentication, charge-parameter exchange, cable check, pre-charge, power delivery and a cyclic current-demand loop. The charger never talks to the BMS directly — it talks to the EVCC.</p></div>
+
+<div class="qa"><span class="q">2. What is the charger controller's role? <span class="lvl">B</span></span>
+<p class="a">It is the brain of the EVSE: runs the session state machine, converts EV requests into voltage/current setpoints for the power stage via PWM and gate drivers, executes safety functions (insulation check, contactor control, overload/over-temperature protection), metering, user authentication, cooling control and backend (OCPP) communication, and logs everything for diagnostics.</p></div>
+
+<div class="qa"><span class="q">3. What hardware exists on the charger side? <span class="lvl">B</span></span>
+<p class="a">Power path: breaker/fuses/SPD, EMI filter, PFC rectifier, DC-link capacitors, isolated DC/DC modules with MOSFET/IGBT/SiC switches, gate drivers, output contactors with pre-charge and discharge circuits, CCS2 connector. Control path: MCUs, voltage/current/temperature sensors, ADC/PWM peripherals, IMD, CP/PP circuits, PLC modem/SECC, aux power supplies, cooling, meter, HMI, RFID, connectivity (CAN/Ethernet/cellular), e-stop and interlocks. (See Table 3.1 for functions, signals and failure modes.)</p></div>
+
+<div class="qa"><span class="q">4. What is the difference between CP and PP? <span class="lvl">B</span></span>
+<p class="a">CP (Control Pilot) is the signalling wire: EVSE-generated PWM whose loaded voltage states (A–F) communicate presence/readiness, plus the PLC carrier in CCS. PP (Proximity Pilot) is a simple resistor-coded wire telling the charger a plug is physically inserted — and in AC charging, the cable's current rating. CP is safety-critical and bidirectional in meaning; PP is a presence/rating signal.</p></div>
+
+<div class="qa"><span class="q">5. What is PLC in CCS2 charging? <span class="lvl">B</span></span>
+<p class="a">Power Line Communication: data is modulated onto the CP–PE loop using HomePlug Green PHY (≈2–30 MHz OFDM), so no extra data cable is needed. Both ends have a modem (EVCC/SECC) that first runs SLAC to pair, then carries TCP/IP and the V2G protocol messages.</p></div>
+
+<div class="qa"><span class="q">6. What is SLAC? <span class="lvl">I</span></span>
+<p class="a">Signal Level Attenuation Characterisation — the ISO 15118-3 matching procedure where EV and charger characterize the signal attenuation on the cable to discover each other, exchange CM_SLAC_MATCH parameters, and build a secured logical network before any charging messages flow. It guarantees the right car is talking to the right charger over a shared medium.</p></div>
+
+<div class="qa"><span class="q">7. What are ISO 15118 and DIN 70121? <span class="lvl">I</span></span>
+<p class="a">DIN 70121 is the earlier, DC-only CCS application protocol — core charging messages, no full PKI security. ISO 15118-2 (2014) extends it to AC+DC, adds TLS and PKI-based Plug &amp; Charge and scheduling; ISO 15118-20 (2022) is the second generation with a new message set and bidirectional power transfer (V2G/BPT). Vehicles negotiate the common version in SupportedAppProtocol.</p></div>
+
+<div class="qa"><span class="q">8. What happens during charging negotiation? <span class="lvl">I</span></span>
+<p class="a">After session setup and authorization, ChargeParameterDiscovery exchanges limits: EV declares its battery's max/min voltage and current, charger declares its output window; a schedule may be agreed. Then CableCheck verifies insulation, PreCharge matches the charger output to battery voltage, PowerDelivery(Start) energizes, and each CurrentDemand message updates the requested current within the negotiated limits.</p></div>
+
+<div class="qa"><span class="q">9. What is a buck converter? <span class="lvl">B</span></span>
+<p class="a">A step-down switching regulator: a series switch chops the input, an inductor + capacitor filter it, and the duty cycle D of the PWM sets the average output: V<sub>out</sub> = D·V<sub>in</sub> (ideal CCM). The inductor stores energy while the switch is ON and releases it through the freewheeling diode (or synchronous MOSFET) while OFF.</p></div>
+
+<div class="qa"><span class="q">10. What is a boost converter? <span class="lvl">B</span></span>
+<p class="a">A step-up switching regulator: while the switch is ON the inductor charges from the input; when it opens, the inductor's voltage flips and adds to the input, pushing current through a diode into the output capacitor. Ideal CCM relation: V<sub>out</sub> = V<sub>in</sub>/(1−D). Used, for example, as the PFC stage that creates the DC link in chargers.</p></div>
+
+<div class="qa"><span class="q">11. How does PWM control output voltage? <span class="lvl">B</span></span>
+<p class="a">The switch is ON for a fraction D of each period. The inductor integrates voltage over time (volt-second balance), so the average output scales with D: raising D in a buck raises V<out>; in a boost, raising D shortens the OFF interval, forcing the same inductor current into less time, raising V<sub>out</sub>. A feedback loop (PI compensator on the sensed output) continuously adjusts D.</p></div>
+
+<div class="qa"><span class="q">12. What is a gate driver? <span class="lvl">B</span></span>
+<p class="a">A circuit between the MCU's logic PWM and the power switch: it level-shifts and isolates (opto/magnetic/capacitive), sources/sinks amps of gate current to charge/discharge gate capacitance quickly (10–15 V gate rails for MOSFETs, ±15/0 for IGBTs), inserts dead-time in half-bridges, and protects with desaturation/over-current detection that trips the switch faster than software can.</p></div>
+
+<div class="qa"><span class="q">13. Why are voltage and current sensors needed? <span class="lvl">B</span></span>
+<p class="a">Three reasons: (1) control — the feedback loops need accurate V/I to regulate output; (2) protection — over-current/OVP detection must be fast and independent; (3) compliance/billing — metering and protocol reporting require trustworthy measurements. Redundancy and plausibility checks make the system robust to sensor faults.</p></div>
+
+<div class="qa"><span class="q">14. What is a DC link? <span class="lvl">B</span></span>
+<p class="a">The intermediate DC bus (with its capacitor bank) between two conversion stages — in a charger, between the PFC rectifier and the isolated DC/DC stage (e.g. ~800 V class, product-dependent). It buffers energy, absorbs switching ripple, and decouples the two stages so each can be controlled semi-independently. It must be pre-charged, monitored and discharged safely.</p></div>
+
+<div class="qa"><span class="q">15. Why are contactors and pre-charge circuits used? <span class="lvl">I</span></span>
+<p class="a">Contactors provide a physical, galvanic disconnect that survives faults and welding detection, unlike semiconductor switches. Pre-charge avoids closing a contactor into a large ΔV (output capacitors vs battery voltage), which would cause a destructive inrush current/arc: instead the charger ramps its output to battery voltage first (or uses a resistor pre-charge), so the contactor closes at ~0 V difference.</p></div>
+
+<div class="qa"><span class="q">16. What is insulation monitoring? <span class="lvl">I</span></span>
+<p class="a">Because the DC output floats relative to earth, the IMD measures the insulation resistance between DC+ / DC− and PE using an injected test signal. IEC 61851-23 practice: perform the test before energizing (CableCheck) and monitor continuously during charging; thresholds are commonly expressed in Ω/V of operating voltage — below a defined limit, the session must not start or must stop (summary; verify edition for design values).</p></div>
+
+<div class="qa"><span class="q">17. What happens if communication is lost mid-session? <span class="lvl">I</span></span>
+<p class="a">The EVSE follows the standard's loss-of-communication procedure: it stops power delivery within defined timeouts, opens contactors, and goes to a safe CP state; the EV similarly stops drawing. State machines treat message-level timeouts and CP-level loss differently, but both end in safe shutdown, never in "last known setpoint forever".</p></div>
+
+<div class="qa"><span class="q">18. What is a charger state machine? <span class="lvl">I</span></span>
+<p class="a">The firmware structure that models the session lifecycle (IDLE → PREPARE → SLAC/SESSION → CABLE CHECK → PRECHARGE → CHARGING → RAMPDOWN → DONE, plus FAULT) with guarded transitions, timeouts on every wait, and severity-graded responses. It runs as a hard-real-time task alongside control loops, with hardware interlocks as a backstop (Figure 6, §10.3).</p></div>
+
+<div class="qa"><span class="q">19. How can MATLAB/Simulink help? <span class="lvl">I</span></span>
+<p class="a">Simulate the power electronics (buck/boost/PFC/DC-DC with real semiconductor models), design and tune the control loops before hardware, model the session state machine in Stateflow and test fault sequences, and run HIL with the real controller against the simulated plant. The MathWorks buck example (30 V→15 V) is a good starting point [R16].</p></div>
+
+<div class="qa"><span class="q">20. How would you debug a charging failure? <span class="lvl">S</span></span>
+<p class="a">Layer by layer, using logs and measurements instead of guessing: (1) physical layer — plug, CP states, voltages with a scope; (2) PLC layer — SLAC logs, attenuation; (3) protocol layer — V2G message traces, which message failed, EVSEStatusCode; (4) power layer — DC-link present? contactor feedback? insulation test result? Check documentation for error codes, compare a working session, and never bypass protections to force a start.</p></div>
+
+<div class="qa"><span class="q">21. How does embedded C/C++ fit into a charger controller? <span class="lvl">I</span></span>
+<p class="a">C on the MCU for the hard-real-time parts: ISRs for ADC/PWM, control loops, state machines, drivers, protocol parsers (often MISRA-influenced style, fixed-point where deterministic). C++ (or higher-level code) on application controllers for session management, OCPP, HMI. The discipline: bounded ISRs, no dynamic allocation in critical paths, watchdog coverage, defensive parsing of every external message.</p></div>
+
+<div class="qa"><span class="q">22. Difference between EV-to-charger and charger-to-backend communication? <span class="lvl">I</span></span>
+<p class="a">EV↔charger = ISO 15118/DIN over PLC, real-time, safety-relevant, controls the power stage, session-scoped. Charger↔backend = OCPP over IP (Ethernet/4G), manages authorization, pricing, telemetry, remote commands; slower, not safety-critical to the power flow, and the charger must behave safely offline. Different stacks, different latency classes, different failure policies.</p></div>
+
+<div class="qa"><span class="q">23. Why is SiC replacing IGBTs in fast chargers? <span class="lvl">I</span></span>
+<p class="a">SiC MOSFETs switch faster with lower losses at high voltage, allowing higher switching frequency (smaller magnetics), higher efficiency (less cooling), and higher power density — vendors like Infineon target exactly EV-charging power modules with 1200 V SiC families [R13]. Trade-offs: gate-drive sensitivity, cost, EMI design care.</p></div>
+
+<div class="qa"><span class="q">24. What limits how fast a battery charges? <span class="lvl">B</span></span>
+<p class="a">The BMS decides: cell chemistry and temperature, state of charge (taper at high SOC), cell-voltage headroom, and pack thermal limits. The charger can only deliver what the EV requests; the negotiated CurrentDemand loop tracks these limits. (Charger-side limits also apply: its own output window and thermal capability.)</p></div>
+
+<div class="qa"><span class="q">25. What is OCPP and how does it relate to the session? <span class="lvl">I</span></span>
+<p class="a">Open Charge Point Protocol — charger↔central-system protocol for authorization, meter values, status, transactions and remote control. It runs in parallel to the EV session: the EV session (ISO 15118) does the power and safety negotiation; OCPP conveys billing/telemetry and can start/stop transactions. They are independent stacks that meet at the charge-transaction record.</p></div>
+
+<div class="qa"><span class="q">26. What does the EVSE do between "plug in" and "power on"? <span class="lvl">S</span></span>
+<p class="a">CP State B detection and diode check, connector lock, PLC wake and SLAC pairing, IP/TCP(/TLS) setup, protocol negotiation and authorization, ChargeParameterDiscovery limits exchange, CableCheck insulation test (repeats until pass), PreCharge voltage matching, EV closes its contactors, then CP→C and PowerDelivery(Start). Each step has a timeout and a fault path.</p></div>
+
+<div class="qa"><span class="q">27. What is welding detection? <span class="lvl">I</span></span>
+<p class="a">At session end (and periodically), the system verifies the contactors actually opened and are not welded: e.g. check voltage/current signatures after opening — a welded contactor shows unexpected voltage across it or current through it. ISO 15118-2 defines the WeldingDetection message exchange implementing this per IEC 61851 [R5]. A welded contactor must latch the charger out of service.</p></div>
+
+<div class="qa"><span class="q">28. How does the charger handle an EV requesting less current than expected? <span class="lvl">S</span></span>
+<p class="a">That's normal operation, not a fault: the BMS tapers current for thermal/SOC/balancing reasons. The charger follows the request within its own limits (its control loop tracks the new setpoint), reports actuals in CurrentDemandRes, and only flags anomalies if the request itself is inconsistent (e.g. below EVMinimumCurrentLimit or contradicting battery data).</p></div>
+
+<div class="qa"><span class="q">29. A sensor reports an implausible value — what should the controller do? <span class="lvl">S</span></span>
+<p class="a">Trust the plausibility check, not the sensor: cross-check with independent sensors (e.g. second current channel, energy-balance V×I vs meter), check range/rate-of-change limits, and if implausible, fail-safe: derate or stop the session rather than act on bad data; log the event with context. Design-wise, safety functions should use redundant/diverse sensing.</p></div>
+
+<div class="qa"><span class="q">30. Why does the output voltage range matter (e.g. 150–1000 V)? <span class="lvl">I</span></span>
+<p class="a">Because EVs span 400 V-class and 800 V-class packs, the charger's DC/DC must be able to regulate across that whole window at rated current (or the site stacks modules). Topology choice (wide-gain LLC, DAB, module series/parallel reconfiguration) is driven by this range — a good example of "topology depends on requirements" from §9.3.</p></div>
+</div>
+
+<!-- ============ SECTION 15 ============ -->
+<div class="page pb">
+<h1>15. Practical Scenarios — Reasoning Walkthroughs</h1>
+<p>Common thread: <b>documentation → safety → logs → measured evidence → hypothesis → targeted test</b>. Never bypass a protection to make something "work".</p>
+
+<h4>Scenario 1 — The charger detects the EV but charging does not start</h4>
+<p><b>Reason it through:</b> Detection (CP State B, SLAC ok) is upstream of authorization/limits. Diagnostic order: 1) session logs — which V2G message failed or timed out? 2) if Authorization failed → check backend link, whitelist, RFID/PnC config. 3) if ChargeParameterDiscovery failed → EV limits vs EVSE output window (e.g. EV wants 800 V, charger max 500 V → no overlap; that's a compatibility issue, not a fault). 4) if CableCheck loops → IMD readings, humidity, connector contamination. 5) if PreCharge times out → EV-side contactor closure confirmed? Output short? Each branch has a distinct log signature.</p>
+
+<h4>Scenario 2 — The PLC link cannot be established</h4>
+<p><b>Order:</b> 1) confirm CP wiring/injection circuit integrity (SLAC runs on CP–PE). 2) Read SLAC logs: does EV send CM_SLAC_PARM? Does EVSE answer with attenuation profiles? If no frames at all → modem/coupler/cabling. If frames but no match → attenuation too high (long/damaged cable, EMI filter poisoning the band) or firmware/protocol-profile mismatch. 3) Try a second vehicle / a known-good cable to isolate EV vs charger. 4) Check for recent firmware change on either side.</p>
+
+<h4>Scenario 3 — Output voltage does not follow the requested value</h4>
+<p><b>Order:</b> 1) Safety first: is this a steady offset, oscillation, or saturation at a clamp? 2) Log the setpoint actually received from the session vs what the loop commanded. 3) Check the feedback chain: measure output with a calibrated meter vs the charger's own sensor — if they disagree, sensor/gain calibration issue. 4) If sensor is right: loop instability (scope the control PWM, look for hunting), or the module hit an internal limit (DC-link sag, thermal derate). 5) Verify the DC-link voltage supports the requested output (output ≤ link − margin for buck-derived stages).</p>
+
+<h4>Scenario 4 — Current readings are unstable/noisy</h4>
+<p><b>Order:</b> 1) Compare two independent current measurements (sensor vs meter) — if both noisy, real ripple; if only the internal one, sensor/ADC issue. 2) Check ADC sampling synchronization with PWM (aliasing of switching ripple into the readings). 3) Inspect grounding/shielding of the sensor cable (EMI pickup). 4) Check load side: is the EV itself oscillating (some vehicles hunt with poorly damped loops)? 5) Look at control loop gains — recently changed? Oscillation frequency vs loop bandwidth.</p>
+
+<h4>Scenario 5 — The converter overheats</h4>
+<p><b>Order:</b> 1) Confirm with IR camera — which component: switch, inductor, busbar? 2) Check cooling first (fans/pumps, filters, coolant flow, ambient temperature) — most common cause. 3) Review the duty cycle/power profile at the time (derating curves respected?). 4) If a specific switch is hot → gate-drive issue (slow switching), loose termination, or degraded device (compare R<sub>DS(on)</sub>/V<sub>CE</sub> trend across modules). 5) Verify thermal derating logic actually reduced current — if it didn't, that's a firmware/logic bug to file.</p>
+
+<h4>Scenario 6 — The contactor does not close</h4>
+<p><b>Order:</b> 1) Is a close command even issued? (State machine stuck upstream — check why: safety chain open, pre-charge incomplete.) 2) Coil voltage present at the contactor? If yes but no click → mechanical/coil fault. 3) Aux contact feedback vs actual state — miswired or broken aux. 4) If it closed once and never again → possible welding latch from a previous session (check the welding-detection logs and output-voltage-present flag). 5) Inspect interlock chain (e-stop, doors) before blaming the contactor.</p>
+
+<h4>Scenario 7 — Pre-charge does not complete</h4>
+<p><b>Order:</b> 1) Confirm from logs: output voltage ramped but never matched the battery? or didn't ramp at all? 2) Didn't ramp → DC/DC setpoint chain, or output short (then IMD might also flag). 3) Ramped but ΔV stays large → EV-side contactor not actually closed (ask the EV: its log/status), or EV mis-reporting its battery voltage. 4) Timeout too aggressive for a very large EV pack? Compare configured timeout vs pack size. 5) Check pre-charge resistor health if it's a resistor-based design (thermal/continuity).</p>
+
+<h4>Scenario 8 — Charging stops unexpectedly mid-session</h4>
+<p><b>Order:</b> 1) Pull the session log: who stopped it — EV (PowerDelivery Stop with reason), EVSE fault, or backend? 2) If EVSE fault → which code, at what V/I/T operating point? Pattern (e.g. always at same current → thermal; random → comms). 3) If comm timeout → PLC quality stats, EMI events (e.g. compressor start nearby), CP pin integrity. 4) If EV stopped → the reason code from the vehicle (SOC reached, battery protection). 5) Reproduce with a controlled load/EV simulator if possible — real evidence beats speculation.</p>
+
+<h4>Scenario 9 — The EV requests less current than expected</h4>
+<p><b>Order:</b> 1) This is usually correct behaviour: BMS tapers on SOC/temperature/cell-voltage. Check the trend: smooth taper = normal; sudden drop = battery protection event. 2) Compare against a session matrix for that EV model (some vehicles simply cap below the charger's rating — compatibility, not fault). 3) If the request contradicts battery data (e.g. cold battery full current) → firmware/policy question with the OEM. 4) Confirm the charger is not the one limiting (derating active? grid limit?).</p>
+
+<h4>Scenario 10 — A sensor reports an implausible value</h4>
+<p><b>Order:</b> 1) Plausibility rules should already have flagged it (range, rate, cross-sensor). 2) Verify physically at the connector/sensor with a meter — wiring/connector first (most common). 3) Check calibration constants/configuration for that channel (wrong scaling after an update?). 4) Check whether the ADC channel itself reads other sensors correctly (peripheral vs sensor). 5) File the event with full context; if safety-relevant, fail-safe now and diagnose after.</p>
+
+<h4>Scenario 11 (bonus) — Random trips only at certain sites</h4>
+<p><b>Order:</b> 1) Compare site electrical environment: grid quality (sags/surges), grounding quality, nearby interference. 2) Check whether trips correlate with grid events via input sensing logs. 3) Review SPD counter and input filter health. 4) Site-specific EMI (e.g. large VFDs nearby) affecting PLC quality → SLAC/comm timeout pattern. 5) Produce a site report with measured evidence — don't tune firmware to mask a site problem.</p>
+
+<h4>Scenario 12 (bonus) — New EV model charges, but slowly, on all your chargers</h4>
+<p><b>Order:</b> 1) Capture a full V2G trace: what does ChargeParameterDiscovery say the EV's limits are? 2) Check the EV's request curve over SOC — normal taper or flat low cap? 3) Compare EV-side vs charger-side declared limits — narrow EV max current/voltage = vehicle design choice. 4) Document as a compatibility profile (charging curve) — this is exactly how real interoperability teams work.</p>
+</div>
+
+<!-- ============ SECTION 16 ============ -->
+<div class="page pb">
+<h1>16. Glossary, Standards Map and 3-Day Study Roadmap</h1>
+
+<h3>16.1 Glossary of abbreviations</h3>
+<table>
+<tr><th style="width:16%;">Abbreviation</th><th style="width:34%;">Full term</th><th>Meaning in one line</th></tr>
+<tr><td>AC / DC</td><td>Alternating / Direct Current</td><td>Grid vs battery-side electrical domains</td></tr>
+<tr><td>BMS</td><td>Battery Management System</td><td>Vehicle system managing cell safety and charge limits</td></tr>
+<tr><td>CCS</td><td>Combined Charging System</td><td>Charging interface family (CCS1/CCS2) combining AC pins + DC pins</td></tr>
+<tr><td>CP / PP</td><td>Control Pilot / Proximity Pilot</td><td>Signalling pin (PWM+PLC) / plug-presence pin</td></tr>
+<tr><td>DCFC</td><td>DC Fast Charger</td><td>Off-board DC charging station</td></tr>
+<tr><td>DAB</td><td>Dual Active Bridge</td><td>Isolated bidirectional DC/DC topology</td></tr>
+<tr><td>EMI / EMC</td><td>Electromagnetic Interference / Compatibility</td><td>Noise suppression and immunity design</td></tr>
+<tr><td>EVCC / SECC</td><td>EV / Supply-Equipment Communication Controller</td><td>The two PLC session endpoints</td></tr>
+<tr><td>EVSE</td><td>Electric Vehicle Supply Equipment</td><td>Standards term for the charging station</td></tr>
+<tr><td>HPGP</td><td>HomePlug Green PHY</td><td>PLC physical layer used by ISO 15118-3</td></tr>
+<tr><td>HIL</td><td>Hardware-in-the-Loop</td><td>Real controller tested against simulated plant</td></tr>
+<tr><td>IMD</td><td>Insulation Monitoring Device</td><td>Measures DC-output-to-PE insulation resistance</td></tr>
+<tr><td>LLC</td><td>Inductor-Inductor-Capacitor resonant converter</td><td>Common isolated DC/DC topology in chargers</td></tr>
+<tr><td>MCU</td><td>Microcontroller Unit</td><td>Embedded processor running control/firmware</td></tr>
+<tr><td>OBC</td><td>On-Board Charger</td><td>In-car AC charger (bypassed in DC charging)</td></tr>
+<tr><td>OCPP</td><td>Open Charge Point Protocol</td><td>Charger↔backend management protocol</td></tr>
+<tr><td>OVP / OCP</td><td>Over-Voltage / Over-Current Protection</td><td>Protection functions (hardware and software)</td></tr>
+<tr><td>PFC</td><td>Power Factor Correction</td><td>Front-end stage shaping grid current, making the DC link</td></tr>
+<tr><td>PKI</td><td>Public Key Infrastructure</td><td>Certificate system behind Plug &amp; Charge</td></tr>
+<tr><td>PLC</td><td>Power Line Communication</td><td>Data over the CP–PE power/signalling lines</td></tr>
+<tr><td>PWM</td><td>Pulse-Width Modulation</td><td>Duty-cycle-controlled switching</td></tr>
+<tr><td>SLAC</td><td>Signal Level Attenuation Characterisation</td><td>EV↔EVSE pairing procedure over PLC</td></tr>
+<tr><td>SiC</td><td>Silicon Carbide</td><td>Wide-bandgap semiconductor for HV switches</td></tr>
+<tr><td>SPD</td><td>Surge Protection Device</td><td>Clamps lightning/grid surges</td></tr>
+<tr><td>TLS</td><td>Transport Layer Security</td><td>Encryption layer used by ISO 15118-2 PnC</td></tr>
+<tr><td>VCU</td><td>Vehicle Control Unit</td><td>Vehicle-level coordination controller</td></tr>
+<tr><td>V2G</td><td>Vehicle-to-Grid</td><td>Bidirectional energy exchange concept/standard family</td></tr>
+<tr><td>CCM / DCM</td><td>Continuous / Discontinuous Conduction Mode</td><td>Inductor current never / sometimes reaches zero</td></tr>
+</table>
+
+<h3>16.2 3-day focused study plan (prioritised to the manager's topics)</h3>
+<table>
+<tr><th style="width:14%;">When</th><th style="width:20%;">Focus</th><th>What to do (concrete)</th></tr>
+<tr><td><b>Day 1 morning</b></td><td>Big picture + architecture</td><td>Read §1–§2; redraw Figure 1 from memory (power/control/comms paths); say aloud what each block does. Explain AC vs DC charging in 60 seconds.</td></tr>
+<tr><td><b>Day 1 afternoon</b></td><td>Hardware</td><td>Skim Table 3.1 twice; for 10 key components (breaker→contactor), rehearse: function, failure mode, how tested. Memorise the "power stage vs control stage" split (§1.4).</td></tr>
+<tr><td><b>Day 2 morning</b></td><td>Communication (the manager's #1 topic)</td><td>Read §5 fully; redraw Figure 3 (CP states) and Figure 5 (sequence) from memory. Practise saying the 17-step session story (§6) in 2 minutes and in 10 minutes. Memorise the message names and what each does (Table in §5.7).</td></tr>
+<tr><td><b>Day 2 afternoon</b></td><td>Buck/boost</td><td>Read §7–§9; redo both worked examples on paper without looking; derive V<sub>out</sub>=D·V<sub>in</sub> and V<sub>out</sub>=V<sub>in</sub>/(1−D) via volt-second balance; practise Figure 9 interpretation.</td></tr>
+<tr><td><b>Day 3 morning</b></td><td>Embedded + simulation</td><td>Read §10–§11; write the pseudocode state machine once by hand; if MATLAB is available, build the 30 V→15 V buck per the MathWorks example and screenshot the response — bring it as a portfolio artifact.</td></tr>
+<tr><td><b>Day 3 afternoon</b></td><td>Faults + interview drill</td><td>Read §12 and §15; do all 30 Q&amp;A (§14) out loud; pick 3 scenarios and explain diagnostic steps to a friend. Prepare 3 questions to ask the manager (their topology? protocol versions? HIL setup?).</td></tr>
+</table>
+<div class="note"><b>Interview mindset:</b> when unsure, reason from first principles (what does safety require? what does the energy path need? what does the feedback loop see?) and say "that will be architecture/standard-dependent, but here's my reasoning…". Managers hire for reasoning, not recall.</div>
+</div>
+
+<!-- ============ SECTION 17 ============ -->
+<div class="page pb">
+<h1>17. References</h1>
+<p class="small">All URLs accessed and verified on <b>9 October 2026</b>. Where a claim is a summary of a standard by a third party, the citation says so; consult the actual standards (IEC 61851-1/-23, ISO 15118-2/-3/-20, DIN 70121) for normative requirements.</p>
+<p class="ref">[R1] Geocadra, "IEC 61851 Explained: EV Charging Standards &amp; Inspection" — control-pilot states A–F, voltage levels. <a href="https://www.geocadra.com/en/standards/iec-61851-ev-charging">https://www.geocadra.com/en/standards/iec-61851-ev-charging</a></p>
+<p class="ref">[R2] HDT Electronic, "How does EVSE work? Control Pilot and Proximity signals" — CP/PP explanation, EVSE states. <a href="https://www.hdt-electronic.com/en/faq/how-does-evse-work-what-are-control-pilot-and-proximity-contact-signals/">https://www.hdt-electronic.com/en/faq/…</a></p>
+<p class="ref">[R3] Texas Instruments, "Understanding Buck Power Stages in Switchmode Power Supplies" (SLVA057) — CCM equations, V<sub>out</sub>/V<sub>in</sub> = D, ripple current, switch/diode/inductor roles. <a href="https://www.ti.com/lit/pdf/slva057">https://www.ti.com/lit/pdf/slva057</a></p>
+<p class="ref">[R4] ISO 15118-3:2015 standard entry (ITEH) — EV–EVSE matching, HomePlug Green PHY, SLAC scope. <a href="https://standards.iteh.ai/catalog/standards/iec/1a6ca72b-ed82-4f27-a76c-9ffb3479c704/iso-15118-3-2015">https://standards.iteh.ai/…/iso-15118-3-2015</a> (also FHWA docket PDF of ISO 15118-3: <a href="https://downloads.regulations.gov/FHWA-2022-0008-0405/attachment_1.pdf">attachment_1.pdf</a>)</p>
+<p class="ref">[R5] Typhoon HIL, "ISO 15118-2 Protocol" documentation — full DC message sequence (SupportedAppProtocol → SessionStop), CableCheck/PreCharge/CurrentDemand semantics. <a href="https://www.typhoon-hil.com/documentation/typhoon-hil-software-manual/References/iso15118_protocol.html">https://www.typhoon-hil.com/…/iso15118_protocol.html</a> (accessed 9 Oct 2026)</p>
+<p class="ref">[R5b] ISO 15118-2:2014, Online Browsing Platform entry. <a href="https://www.iso.org/obp/ui/es/#!iso:std:55366:en">https://www.iso.org/obp/…55366:en</a></p>
+<p class="ref">[R6] JointCharging, "What is DIN 70121 for EV Chargers?" — DIN 70121 scope vs ISO 15118 (PnC, TLS, AC/DC coverage). <a href="https://jointcharging.com/what-is-din-70121-for-ev-chargers/">https://jointcharging.com/what-is-din-70121-for-ev-chargers/</a></p>
+<p class="ref">[R7] Heliox Energy, "DC Charging: a complete guide to hardware" — DCFC hardware overview, DIN/VDV context. <a href="https://www.heliox-energy.com/blog/dc-charging-a-complete-guide-to-hardware">https://www.heliox-energy.com/blog/dc-charging-a-complete-guide-to-hardware</a></p>
+<p class="ref">[R8] EV Range, "What is Plug &amp; Charge (ISO 15118)?" — PLC/HPGP as physical layer, CableCheck/PreCharge DC specifics. <a href="https://www.evrange.com/ev-range-insights/what-is-iso-15118">https://www.evrange.com/ev-range-insights/what-is-iso-15118</a></p>
+<p class="ref">[R9] C. Lewandowski, "Performance Evaluation of PLC over the IEC 61851 Control Pilot", Univ. Málaga proceedings — CP PWM + PLC coexistence evidence. <a href="https://plcdocsearch.uma.es/Proceedings/2011/pdf/Lewandowski.pdf">https://plcdocsearch.uma.es/…/Lewandowski.pdf</a></p>
+<p class="ref">[R10] Gongyuan Global, "Insulation Monitoring Device for EV Charger (IEC 61851-23)" — cable-check flow, Ω/V threshold summary. <a href="https://global-gongyuan.com/insulation-monitoring-device-for-ev-charger/">https://global-gongyuan.com/insulation-monitoring-device-for-ev-charger/</a></p>
+<p class="ref">[R11] Texas Instruments, "Electrical Safety for Electric Vehicle Charging" (SLUAB09) — IMD / EV-side isolation monitoring, IEC 61851-23 context. <a href="https://www.ti.com/lit/pdf/sluab09">https://www.ti.com/lit/pdf/sluab09</a></p>
+<p class="ref">[R12] Texas Instruments, "Fundamentals of MOSFET and IGBT Gate Driver Circuits" (SLUA618). <a href="https://www.ti.com/lit/pdf/slua618">https://www.ti.com/lit/pdf/slua618</a></p>
+<p class="ref">[R13] Infineon, CoolSiC™ MOSFETs and modules for EV charging — SiC in DC fast charging. <a href="https://www.infineon.com/products/power/mosfet/silicon-carbide">https://www.infineon.com/products/power/mosfet/silicon-carbide</a></p>
+<p class="ref">[R14] ISO 15118-20:2022 documents (FHWA docket attachment_3.pdf; ITEH entry) — second-generation V2G, BPT scope. <a href="https://downloads.regulations.gov/FHWA-2022-0008-0405/attachment_3.pdf">attachment_3.pdf</a></p>
+<p class="ref">[R15] STMicroelectronics, AN6378 "How to design a transition mode PFC boost pre-regulator" — boost PFC practice. <a href="https://www.st.com/resource/en/application_note/an6378-…">https://www.st.com/resource/en/application_note/an6378</a></p>
+<p class="ref">[R16] MathWorks, "Buck Converter — MATLAB &amp; Simulink" (Simscape Electrical example, 30 V→15 V). <a href="https://www.mathworks.com/help/simscape-electrical/ug/buck-converter-example.html">https://www.mathworks.com/help/simscape-electrical/ug/buck-converter-example.html</a> (accessed 9 Oct 2026)</p>
+<p class="ref">[R17] MathWorks, "Buck Converter block" reference (Simscape Electrical). <a href="https://www.mathworks.com/help/simscape-electrical/ref/buckconverter.html">https://www.mathworks.com/help/simscape-electrical/ref/buckconverter.html</a></p>
+<p class="ref">[R18] AUTOSAR, "Specification of ISO15118 Charging" (R24-11) — V2GTP/PowerDeliveryReq module view. <a href="https://www.autosar.org/fileadmin/standards/R24-11/CP/AUTOSAR_CP_SWS_ISO15118Charging.pdf">https://www.autosar.org/…/AUTOSAR_CP_SWS_ISO15118Charging.pdf</a></p>
+<p class="ref">[R19] CharIN, "Guideline for DC CCS Implementation according to DIN SPEC 70121" — common implementation errors, CCS development practice. <a href="https://www.charin.global/media/pages/home/technical-details-ccs-basic/b70e776669-1645622498/ccs_guideline_v1p6.pdf">https://www.charin.global/…/ccs_guideline_v1p6.pdf</a></p>
+<p class="ref">[R20] RENCO, "EV Charging Standards: CCS, ISO 15118 &amp; Plug and Charge" — DIN 70121 vs ISO 15118-2 comparison table. <a href="https://www.renco.de/resources/ev-charging-standards">https://www.renco.de/resources/ev-charging-standards</a></p>
+<div class="note" style="margin-top:6mm;"><b>Verification note.</b> Protocol message names and sequence order were verified against [R5]/[R18]; CP states and levels against [R1]/[R2] (secondary summaries); buck/boost equations against [R3] and standard theory; insulation practice against [R10]/[R11]; Simulink workflow against [R16]/[R17]. Items flagged <i>architecture-dependent</i> or <i>illustrative</i> in the text are not verifiable universal facts and should be checked against your target company's actual products and the current standard editions.</div>
+</div>
+
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4bc70e2c01a94c73b74392e4234840661791215815920" integrity="sha512-L0ha0OXavK/8okipN9F8BtP84dg9DUhPERbBXzwI6dgTA55d2+yweo3pn5CSFYs45/r8md2+xvUPtTdvTNRfjA==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>
